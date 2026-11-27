@@ -1,11 +1,10 @@
 import { useEffect, useRef } from "react"
 
 import { useApiForm } from "../../lib/form"
-import { useForgotPassword, useLogin, useRegister, useResetPassword, useVerifyEmail } from "./hooks"
+import { useForgotPassword, useLogin, useResetPassword, useVerifyEmail } from "./hooks"
 import {
   forgotPasswordSchema,
   loginSchema,
-  registerSchema,
   resetPasswordSchema,
   verifyEmailSchema,
 } from "./schemas"
@@ -15,14 +14,6 @@ export function useLoginForm() {
   return useApiForm(loginSchema, {
     defaultValues: { email: "", password: "" },
     submit: (body) => login.mutateAsync({ body }),
-  })
-}
-
-export function useRegisterForm() {
-  const register = useRegister()
-  return useApiForm(registerSchema, {
-    defaultValues: { fullName: "", email: "", password: "", confirmPassword: "" },
-    submit: register.submit,
   })
 }
 

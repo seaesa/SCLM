@@ -31,6 +31,12 @@ jobs:
         ports: ["6379:6379"]
         options: >-
           --health-cmd "redis-cli ping" --health-interval 5s --health-retries 10
+      rustfs:
+        image: rustfs/rustfs:latest
+        env:
+          RUSTFS_ACCESS_KEY: rustfsadmin
+          RUSTFS_SECRET_KEY: rustfsadmin
+        ports: ["9000:9000"]
     # Settings come from the committed `.env.development` (migrations) and `.env.test` (pytest).
     steps:
       - uses: actions/checkout@v7

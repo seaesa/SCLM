@@ -2,7 +2,7 @@ import os
 from functools import lru_cache
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, PostgresDsn, RedisDsn, field_validator, model_validator
+from pydantic import Field, PostgresDsn, RedisDsn, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 Environment = Literal["development", "test", "staging", "production"]
@@ -60,6 +60,8 @@ class Settings(BaseSettings):
     frontend_url: str
     # When on, business endpoints answer 403 `email_not_verified` until the address is confirmed.
     require_email_verification: bool = True
+    # Off for internal deployments: accounts are created by an admin (`app.cli create-user`).
+    self_registration_enabled: bool = False
 
     # Oldest mobile app version (semver) the API still serves. Older builds that send
     # `X-App-Version` get 426 `app_update_required` and show a blocking "update" screen.
@@ -94,6 +96,18 @@ class Settings(BaseSettings):
     push_backend: Literal["console", "expo", "outbox"] = "console"
     # Only needed when "enhanced push security" is on in the Expo project.
     expo_access_token: str | None = None
+
+    # S3-compatible bucket for contract files (ADR 0005); RustFS in development and tests.
+    storage_endpoint_url: str
+    # Origin browsers use to download files, when it differs from the API's (containers).
+    storage_public_url: str | None = None
+    storage_access_key: str
+    storage_secret_key: SecretStr
+    storage_bucket: str
+    storage_region: str = "us-east-1"
+    storage_download_url_seconds: int = 300
+    # Largest contract scan accepted from a browser upload.
+    max_upload_bytes: int = 50 * 1024 * 1024
 
     @field_validator("cors_origins", mode="before")
     @classmethod

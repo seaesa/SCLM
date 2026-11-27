@@ -1,6 +1,6 @@
 """Prometheus metrics for the HTTP layer.
 
-Requests are labelled by the **route template** (`/api/v1/todos/{todoId}`), never the raw
+Requests are labelled by the **route template** (`/api/v1/partners/{partnerId}`), never the raw
 path: raw paths would make every id a new label value and blow up the registry.
 
 `/metrics` is unauthenticated and mounted only when `METRICS_ENABLED` is true. Keep it off

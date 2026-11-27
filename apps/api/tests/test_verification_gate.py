@@ -2,9 +2,12 @@
 
 import re
 
+from dishka import AsyncContainer
 from httpx import AsyncClient
 
 from app.core.mail import OutboxEmailSender
+from app.shared.permissions import Role
+from tests.contract_factory import grant
 
 PASSWORD = "secret123"
 _TOKEN_RE = re.compile(r"token=([A-Za-z0-9._\-]+)")
@@ -23,12 +26,12 @@ def _bearer(tokens: dict[str, str]) -> dict[str, str]:
     return {"Authorization": f"Bearer {tokens['accessToken']}"}
 
 
-async def test_unverified_user_is_blocked_from_todos(
+async def test_unverified_user_is_blocked_from_business_endpoints(
     client: AsyncClient, outbox: OutboxEmailSender
 ) -> None:
     tokens = await _register(client)
 
-    response = await client.get("/todos", headers=_bearer(tokens))
+    response = await client.get("/partners", headers=_bearer(tokens))
 
     assert response.status_code == 403
     assert response.json()["code"] == "email_not_verified"
@@ -45,14 +48,17 @@ async def test_unverified_user_can_still_read_their_profile(
     assert response.json()["emailVerified"] is False
 
 
-async def test_verifying_unlocks_todos(client: AsyncClient, outbox: OutboxEmailSender) -> None:
+async def test_verifying_unlocks_business_endpoints(
+    client: AsyncClient, outbox: OutboxEmailSender, container: AsyncContainer
+) -> None:
     tokens = await _register(client)
     message = next(m for m in outbox.messages if "/verify-email?token=" in m.text)
     token = _TOKEN_RE.search(message.text)
     assert token is not None
 
     await client.post("/auth/verify-email", json={"token": token.group(1)})
-    response = await client.get("/todos", headers=_bearer(tokens))
+    await grant(container, "gated@example.com", Role.ACCOUNTANT)
+    response = await client.get("/partners", headers=_bearer(tokens))
 
     assert response.status_code == 200
     assert response.json()["items"] == []

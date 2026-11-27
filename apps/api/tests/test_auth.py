@@ -1,4 +1,7 @@
+import pytest
 from httpx import AsyncClient
+
+from app.core.config import Settings
 
 USER = {"email": "john@example.com", "fullName": "John", "password": "secret123"}
 
@@ -81,3 +84,13 @@ async def test_validation_error_shape(client: AsyncClient) -> None:
     assert by_field["fullName"]["code"] == "missing"
     assert by_field["password"]["code"] == "string_too_short"
     assert by_field["password"]["params"] == {"min_length": 8}
+
+
+async def test_register_is_refused_when_self_registration_is_off(
+    client: AsyncClient, settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Internal deployments create accounts with `app.cli create-user`; the public form is closed.
+    monkeypatch.setattr(settings, "self_registration_enabled", False)
+    response = await client.post("/auth/register", json=USER)
+    assert response.status_code == 403
+    assert response.json()["code"] == "forbidden"

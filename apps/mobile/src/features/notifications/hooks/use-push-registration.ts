@@ -1,5 +1,5 @@
 import * as Notifications from "expo-notifications"
-import { router, type Href } from "expo-router"
+import { router } from "expo-router"
 import { useEffect } from "react"
 import { Platform } from "react-native"
 
@@ -28,7 +28,7 @@ export function usePushRegistration() {
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
       const url = response.notification.request.content.data?.url
-      if (typeof url === "string") router.push(url as Href)
+      if (typeof url === "string") router.push(url)
     })
     return () => subscription.remove()
   }, [])

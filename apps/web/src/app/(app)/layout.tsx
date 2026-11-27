@@ -1,24 +1,22 @@
-import Link from "next/link"
-
+import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthGate } from "@/features/auth/components/auth-gate"
+import { SidebarUser } from "@/features/auth/components/sidebar-user"
 import { UnverifiedBanner } from "@/features/auth/components/unverified-banner"
-import { UserMenu } from "@/features/auth/components/user-menu"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGate require="auth">
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-          <Link href="/todos" className="font-semibold">
-            Todos
-          </Link>
-          <UserMenu />
-        </div>
-      </header>
-      <main className="mx-auto max-w-3xl px-4 py-8">
-        <UnverifiedBanner />
-        {children}
-      </main>
+      <TooltipProvider>
+        <SidebarProvider>
+          <AppSidebar footer={<SidebarUser />} />
+          <SidebarInset className="min-w-0">
+            <UnverifiedBanner />
+            {children}
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
     </AuthGate>
   )
 }

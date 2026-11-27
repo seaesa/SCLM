@@ -5,8 +5,8 @@ import Link from "next/link"
 import { useLoginForm } from "@workspace/core/auth"
 import { useTranslation } from "@workspace/i18n"
 
-import { FormInput } from "@/components/form/form-input"
-import { FormRootError } from "@/components/form/form-root-error"
+import { FormInput } from "@/components/design-system/form/form-input"
+import { FormRootError } from "@/components/design-system/form/form-root-error"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
@@ -37,12 +37,6 @@ export function LoginForm() {
           {form.formState.isSubmitting && <Spinner />}
           {form.formState.isSubmitting ? t("auth.login.submitting") : t("auth.login.submit")}
         </Button>
-        <p className="text-center text-sm text-muted-foreground">
-          {t("auth.login.noAccount")}{" "}
-          <Link href="/register" className="text-foreground underline underline-offset-4">
-            {t("auth.login.createOne")}
-          </Link>
-        </p>
         <Link
           href="/forgot-password"
           className="text-center text-sm text-muted-foreground underline underline-offset-4"

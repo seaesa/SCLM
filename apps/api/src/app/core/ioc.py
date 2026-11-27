@@ -13,6 +13,7 @@ from app.core.push import PushSender, create_push_sender
 from app.core.rate_limit import RateLimiter
 from app.core.realtime import RealtimePublisher
 from app.core.security import TokenEncoder
+from app.core.storage import ObjectStorage, S3ObjectStorage
 from app.modules import MODULE_PROVIDERS
 
 
@@ -54,6 +55,10 @@ class InfrastructureProvider(Provider):
     @provide(scope=Scope.APP)
     def push_sender(self, settings: Settings) -> PushSender:
         return create_push_sender(settings)
+
+    @provide(scope=Scope.APP)
+    def object_storage(self, settings: Settings) -> ObjectStorage:
+        return S3ObjectStorage(settings)
 
     @provide(scope=Scope.APP)
     def rate_limiter(self, redis: Redis) -> RateLimiter:

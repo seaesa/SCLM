@@ -10,7 +10,7 @@ pre-commit:
       stage_fixed: true
     - name: lint
       glob: "*.{js,mjs,cjs,ts,tsx}"
-      run: pnpm oxlint --fix {staged_files}
+      run: pnpm oxlint --fix --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
     - name: spell
       run: pnpm cspell --no-progress --no-must-find-files {staged_files}

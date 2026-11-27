@@ -13,3 +13,6 @@ export const STORAGE_KEYS = {
   auth: "auth",
   preferences: "preferences",
 } as const
+
+/** Rows per page a user can choose in a list; the first is the default. The API caps it at 100. */
+export const PAGE_SIZE_OPTIONS = [20, 50, 100] as const

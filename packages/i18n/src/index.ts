@@ -1,27 +1,29 @@
-import i18next, { type i18n as I18n } from "i18next"
+import i18next, { type i18n as I18n, type ParseKeys } from "i18next"
 import { initReactI18next } from "react-i18next"
 
-import { en } from "./locales/en"
 import { vi } from "./locales/vi"
 
 export type { Messages } from "./types"
 
-export const SUPPORTED_LOCALES = ["vi", "en"] as const
+/** A key that exists in the messages: the only kind of string `t` accepts. */
+export type TranslationKey = ParseKeys
+
+/** Vietnamese only; the list stays so another language is one file + one entry away. */
+export const SUPPORTED_LOCALES = ["vi"] as const
 export type Locale = (typeof SUPPORTED_LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = "vi"
 
 export const resources = {
-  en: { translation: en },
   vi: { translation: vi },
 } as const
 
 declare module "i18next" {
   interface CustomTypeOptions {
-    resources: { translation: typeof en }
+    resources: { translation: typeof vi }
   }
 }
 
-/** Map any BCP-47 tag ("vi-VN", "en-US", …) to a supported locale. */
+/** Map any BCP-47 tag ("vi-VN", …) to a supported locale. */
 export function resolveLocale(tag: string | null | undefined): Locale {
   const base = tag?.toLowerCase().split(/[-_]/)[0]
   return SUPPORTED_LOCALES.find((l) => l === base) ?? DEFAULT_LOCALE
@@ -37,7 +39,7 @@ export const i18n: I18n = i18next.createInstance()
 void i18n.use(initReactI18next).init({
   resources,
   lng: DEFAULT_LOCALE,
-  fallbackLng: "en",
+  fallbackLng: DEFAULT_LOCALE,
   supportedLngs: SUPPORTED_LOCALES,
   initAsync: false,
   nsSeparator: false,

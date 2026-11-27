@@ -24,7 +24,7 @@ export function AuthGate({
   const allowed = require === "auth" ? authenticated : !authenticated
 
   useEffect(() => {
-    if (hydrated && !allowed) router.replace(require === "auth" ? "/login" : "/todos")
+    if (hydrated && !allowed) router.replace(require === "auth" ? "/login" : "/")
   }, [hydrated, allowed, require, router])
 
   if (!hydrated || !allowed) {

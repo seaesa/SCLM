@@ -48,7 +48,7 @@ share `hooks.ts` until the file passes ~300 lines; then split by sub-domain (`ho
 
 ### A component
 
-- Named after what it shows: `TodoList`, `UnverifiedBanner`, `DeviceSection` — not after
+- Named after what it shows: `PartnerList`, `UnverifiedBanner`, `DeviceSection` — not after
   where it is used (`ProfileBottom`) or how it looks (`BlueCard`).
 - One exported component per file; small private sub-components may sit in the same file when
   only that component uses them.
@@ -58,10 +58,10 @@ share `hooks.ts` until the file passes ~300 lines; then split by sub-domain (`ho
 ### A function or variable
 
 - Functions are verbs (`formatDate`, `applyServerErrors`, `resolveLocale`); values are nouns
-  (`nextCursor`, `pageSize`).
+  (`totalPages`, `pageSize`).
 - Booleans read as a question: `isPending`, `hasNextPage`, `canDelete`, `shouldRetry`.
 - Units in the name when ambiguous: `timeoutMs`, `ttlSeconds`, `amountMinor`.
-- Collections are plural (`todos`), maps say what maps to what (`titlesByToken`).
+- Collections are plural (`partners`), maps say what maps to what (`titlesByToken`).
 - Avoid generic names (`data`, `info`, `item`, `handle`, `utils`, `helpers`, `manager`) unless the
   scope is a few lines.
 
@@ -75,7 +75,7 @@ share `hooks.ts` until the file passes ~300 lines; then split by sub-domain (`ho
 
 ### Backend
 
-- Module = business capability (`todos`, `notifications`), plural noun.
+- Module = business capability (`partners`, `notifications`), plural noun.
 - Classes: `<Entity>` model, `<Entity>Read/Create/Update/Filter` schemas,
   `<Entity>Repository`, `<Module>Service` (e.g. `NotificationService`).
 - Route handler = `verb_noun` (`register_push_device`); it becomes the SDK function name, so
@@ -118,7 +118,7 @@ wrong thing?_ If yes, test it at the lowest layer that owns the rule. If no, don
 
 | Worth a test                                                     | Not worth a test                                  |
 | ---------------------------------------------------------------- | ------------------------------------------------- |
-| A user cannot read or change another user's todo                 | A button renders                                  |
+| An accountant cannot approve a drafted contract                  | A button renders                                  |
 | Changing the password signs out every device and stops pushes    | A component passes props through                  |
 | A duplicate email answers `409 email_taken` on the `email` field | The generated client builds the right URL         |
 | A 401 triggers one refresh for many concurrent requests          | Tailwind classes                                  |
@@ -136,7 +136,7 @@ what tools check:
 - Early returns over nested conditionals; no nested ternaries (lint enforces).
 - Functions with more than four parameters take an options object.
 - Prefer `interface` for object shapes and `type` for unions; derive types from the generated
-  client (`TodoRead`, `Pick<TodoUpdate, "title">`) instead of redeclaring them.
+  client (`PartnerRead`, `Pick<FieldValueWrite, "kind">`) instead of redeclaring them.
 - No `any`, no non-null `!` outside tests, no `as` casts to silence the compiler; fix the type.
 - Errors: let them propagate to the layer that can show or translate them. Do not swallow with an
   empty `catch` unless the operation is explicitly best-effort, and say so in the name or a comment.

@@ -2,7 +2,7 @@ import uuid
 from collections.abc import Sequence
 from typing import Any
 
-from sqlalchemy import ColumnElement, Select, select
+from sqlalchemy import ColumnElement, Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
@@ -41,6 +41,18 @@ class BaseRepository[ModelT: Base]:
         stmt = self._select(*filters).order_by(*order_by).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def page(
+        self,
+        stmt: Select[ModelT],
+        order_by: Sequence[InstrumentedAttribute[Any] | ColumnElement[Any]],
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[ModelT], int]:
+        """One numbered page of `stmt` and the total number of rows it matches."""
+        total = await self.session.scalar(select(func.count()).select_from(stmt.subquery()))
+        rows = await self.session.scalars(stmt.order_by(*order_by).offset(offset).limit(limit))
+        return rows.all(), total or 0
 
     async def create(self, **values: Any) -> ModelT:
         obj = self.model(**values)

@@ -8,7 +8,7 @@ from app.core.config import Settings
 from app.core.exceptions import ForbiddenError, UnauthorizedError
 from app.modules.auth.service import AuthService
 from app.modules.users.models import User
-from app.shared.permissions import Permission
+from app.shared.permissions import Permission, has_permission
 from app.shared.schemas import ErrorCode
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -43,7 +43,7 @@ def require_permission(permission: Permission) -> Any:
     otherwise 403 `forbidden`. Check permissions, never roles."""
 
     async def check(user: CurrentVerifiedUser) -> User:
-        if permission not in user.permissions:
+        if not has_permission(user.roles, permission):
             raise ForbiddenError("Missing permission", code=ErrorCode.FORBIDDEN)
         return user
 

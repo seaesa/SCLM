@@ -15,8 +15,13 @@
     "./notifications": "./src/features/notifications/index.ts",
     "./preferences": "./src/features/preferences/index.ts",
     "./realtime": "./src/realtime/index.ts",
-    "./todos": "./src/features/todos/index.ts",
-    "./app-update": "./src/features/app-update/index.ts"
+    "./app-update": "./src/features/app-update/index.ts",
+    "./contracts": "./src/features/contracts/index.ts",
+    "./documents": "./src/features/documents/index.ts",
+    "./overview": "./src/features/overview/index.ts",
+    "./partners": "./src/features/partners/index.ts",
+    "./pricing": "./src/features/pricing/index.ts",
+    "./users": "./src/features/users/index.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.6",

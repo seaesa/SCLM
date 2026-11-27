@@ -10,7 +10,7 @@ export default function AppLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>{t("todos.tab")}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("home.title")}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon src={require("@/assets/images/tabIcons/home.png")} />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">

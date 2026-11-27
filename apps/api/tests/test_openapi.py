@@ -12,6 +12,6 @@ def test_operation_ids_are_unique() -> None:
 
 def test_schemas_use_camel_case() -> None:
     schema = create_app().openapi()
-    props = schema["components"]["schemas"]["TodoRead"]["properties"]
+    props = schema["components"]["schemas"]["PartnerRead"]["properties"]
     assert "createdAt" in props
     assert "created_at" not in props

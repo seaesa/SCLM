@@ -49,10 +49,33 @@ class ErrorCode(StrEnum):
     NOT_FOUND = "not_found"
     CONFLICT = "conflict"
     EMAIL_TAKEN = "email_taken"
+    PARTNER_ROLE_MISMATCH = "partner_role_mismatch"
+    OWNER_CANNOT_HANDLE_CONTRACTS = "owner_cannot_handle_contracts"
+    FILE_TOO_LARGE = "file_too_large"
+    FILE_NAME_TAKEN = "file_name_taken"
+    INVALID_FIELD_VALUE = "invalid_field_value"
+    UNKNOWN_FIELD = "unknown_field"
+    FILE_NOT_IN_DOSSIER = "file_not_in_dossier"
+    DOSSIER_NOT_LINKED = "dossier_not_linked"
+    INSTRUMENT_EXISTS = "instrument_exists"
+    ALREADY_WITHDRAWN = "already_withdrawn"
+    FUEL_PRICE_EXISTS = "fuel_price_exists"
+    OFFICIAL_PRICE_LOCKED = "official_price_locked"
+    SIGNED_COPY_REQUIRED = "signed_copy_required"
+    FILE_TYPE_NOT_ALLOWED = "file_type_not_allowed"
+    OWN_ACCESS_REQUIRED = "own_access_required"
+    REVIEW_STATE_INVALID = "review_state_invalid"
+    REVIEW_COMMENT_REQUIRED = "review_comment_required"
+    DOCUMENT_LOCKED = "document_locked"
+    CONTRACT_LOCKED = "contract_locked"
+    CONTRACT_FROM_ARCHIVE = "contract_from_archive"
+    CONTRACT_DOCUMENT_REQUIRED = "contract_document_required"
+    FILE_IN_USE = "file_in_use"
     VALIDATION_ERROR = "validation_error"
     RATE_LIMITED = "rate_limited"
     APP_UPDATE_REQUIRED = "app_update_required"
     HTTP_ERROR = "http_error"
+    CONTRACT_ALREADY_RESIGNED = "contract_already_resigned"
     INTERNAL_ERROR = "internal_error"
 
 
@@ -75,6 +98,15 @@ class ErrorResponse(Schema):
     message: str
     details: list[FieldError] | None = None
     request_id: str | None = None
+
+
+class Page[T](Schema):
+    """One numbered page and the total row count, for tables with page links."""
+
+    items: list[T]
+    total: int
+    page: int
+    page_size: int
 
 
 class CursorPage[T](Schema):

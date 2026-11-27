@@ -16,7 +16,7 @@ const fontSans = Be_Vietnam_Pro({
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
-  title: { default: "Todos", template: "%s · Todos" },
+  title: { default: "SCLM", template: "%s · SCLM" },
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

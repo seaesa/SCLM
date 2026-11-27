@@ -18,6 +18,7 @@ src/app/
     security.py      password hashing (argon2), JWT TokenEncoder (access/refresh/one-shot)
     mail.py          EmailSender protocol: console / smtp / outbox implementations
     push.py          PushSender protocol: console / expo / outbox implementations
+    storage.py       ObjectStorage: immutable, SHA-256-addressed files on S3/RustFS (ADR 0005)
     rate_limit.py    Redis fixed-window limiter + `rate_limit(scope)` dependency
     request_id.py    RequestIdMiddleware (X-Request-ID, bound to structlog)
     metrics.py       Prometheus counters/histogram + /metrics endpoint
@@ -25,14 +26,14 @@ src/app/
     openapi.py       operationId = handler name; realtime events added to OpenAPI
     logging.py       structlog
   shared/
-    schemas.py       Schema (camelCase base), CursorPage[T], ErrorCode, FieldError, ErrorResponse, reject_null
-    pagination.py    CursorParams + opaque cursor encode/decode
+    schemas.py       Schema (camelCase base), Page[T], CursorPage[T], ErrorCode, FieldError, ErrorResponse, reject_null
+    pagination.py    PageParams (page, pageSize); CursorParams + cursor encode/decode for feeds
     repository.py    BaseRepository[Model] (get/find_one/list/create/update/delete)
     locale.py        Locale, resolve_locale, RequestLocale (Accept-Language dependency)
   modules/
     __init__.py      MODULE_PROVIDERS + MODULE_ROUTERS + REALTIME_EVENTS registry
     <module>/        models · schemas · repository · service · provider · router · tasks · events · templates
-                     shipped: auth, users, todos (reference example), notifications, health
+                     shipped: auth, users, partners (reference example), documents, contracts, pricing, overview, notifications, health
 migrations/          Alembic (async), file names prefixed by date
 tests/               pytest against real Postgres + Redis (db `app_test`, redis db 15)
 scripts/export_openapi.py   writes ../../packages/api-client/openapi.json
@@ -63,12 +64,12 @@ their dependencies through `__init__`.
 - **Errors:** raise `NotFoundError`, `ConflictError`, `UnauthorizedError`, `ForbiddenError` or an `AppError` subclass. Codes come from the `ErrorCode` enum (`shared/schemas.py`) — add a member for each new case (clients translate by code; typecheck in `packages/i18n` forces the translation). Pass `field="<camelCaseField>"` when the error belongs to one input so forms show it under that field. `message` is an English fallback only; never rely on it for UI.
 - **Schemas:** every request/response model inherits `app.shared.schemas.Schema` (camelCase aliases, `from_attributes`). Name them `<Entity>Read/Create/Update/Filter`. Put validation constraints on fields (`Field(min_length=…)`): they become Zod rules in the frontend.
 - **Routers:** `APIRouter(prefix=…, tags=[…], route_class=DishkaRoute)`. Inject with `FromDishka[Service]`; auth with `user: CurrentUser`. Always annotate the return type (it becomes the response schema). Path params are camelCase: `Annotated[uuid.UUID, Path(alias="todoId")]` with `"/{todoId}"`.
-- **operationId = handler function name**, and the TS SDK is named after it (`list_todos` → `listTodos`, `listTodosOptions`). Names must be unique across the API (`tests/test_openapi.py` checks this) and should be `verb_noun`.
+- **operationId = handler function name**, and the TS SDK is named after it (`list_partners` → `listPartners`, `listPartnersOptions`). Names must be unique across the API (`tests/test_openapi.py` checks this) and should be `verb_noun`.
 - **DI:** each module has a `provider.py` (`Provider` with `scope = Scope.REQUEST`, `provide(Class)`); register it in `MODULE_PROVIDERS`. App-wide singletons (engine, Redis, settings, `RealtimePublisher`) live in `core/ioc.py`.
-- **Background work:** Celery tasks in `<module>/tasks.py` (`@celery_app.task`), called via `.delay()` after commit. Add the module to `autodiscover_tasks` in `worker.py`. Tasks run eagerly when `ENVIRONMENT=test`.
+- **Background work:** Celery tasks in `<module>/tasks.py` (`@celery_app.task`), called via `.delay()` after commit. Add the module to `autodiscover_tasks` in `worker.py`. Tasks run eagerly when `ENVIRONMENT=test`. A daily job goes in `beat_schedule` in `worker.py`, run by `pnpm --filter api beat`, with a CLI command in `app/cli.py` to run it by hand.
 - **Realtime:** Socket.IO at `/ws/socket.io` on the API origin; clients send `auth: { token }` and join room `user:<id>` (all their devices). Define payloads in `<module>/events.py` (subclass `Event`, set `event_name = "<module>.<what>"`), add them to `REALTIME_EVENTS`, inject `RealtimePublisher` in the service and call `await self.realtime.to_user(user_id, event)` after commit. Run `pnpm codegen` so the frontend gets the typed event.
 - **PATCH bodies:** a nullable column is `X | None` (an explicit `null` clears it); a non-nullable one is wrapped with `reject_null("field")` so `{"field": null}` is a 422 instead of a database error. Omitting the field still means "leave it alone".
-- **Pagination:** cursor based. The filter subclasses `CursorParams` (`limit`, `cursor`); the repository applies a keyset predicate (`tuple_(Model.created_at, Model.id) < tuple_(*params.after)`) and fetches `limit + 1`; the service returns `CursorPage[<X>Read].create(items, limit, cursor_of)`, which yields `{items, nextCursor}` with `nextCursor: null` on the last page.
+- **Pagination:** by page number (ADR 0008). The filter subclasses `PageParams` (`page`, `pageSize` ≤ 100); the repository builds the filtered `select` and returns `await self.page(stmt, order_by, params.offset, params.page_size)` → `(rows, total)`, ordering by a total order that ends with a unique column; the service returns `Page[<X>Read](items=…, total=…, page=…, page_size=…)`. Cursor pagination (`CursorParams`, `CursorPage`) is only for unbounded append-only feeds.
 - **Auth gates:** `CurrentUser` for anything a signed-in user may do (profile, change password, delete account); `CurrentVerifiedUser` for business endpoints, which answer `403 email_not_verified` while `REQUIRE_EMAIL_VERIFICATION` is on. Unverified users can still log in.
 - **Rate limits:** add `Depends(rate_limit("<scope>"))` to credential endpoints (`login`, `register`, `email` scopes exist; add a scope to `Settings.rate_limit_for`). The limiter counts per email (`by_email=True`) or per IP and answers `429 rate_limited` with `Retry-After`.
 - **Email:** never send inline. Render a template (`modules/auth/templates.py`), then `send_email.delay(...)` from `modules/users/tasks.py`; the task resolves `EmailSender` from `create_worker_container()`. Local development uses `EMAIL_BACKEND=console` or `smtp` → Mailpit; tests use `outbox`, which collects messages in `OutboxEmailSender.messages`.
@@ -76,12 +77,13 @@ their dependencies through `__init__`.
   their commit, where `copy` is a `PushCopy` (`{locale: PushContent(title, body)}`) built in the
   module's `templates.py`. Delivery is a Celery task that renders each device in the locale it
   registered with (fallback `en`) and deletes tokens Expo reports as dead. Put a deep link in
-  `data={"url": "/todos"}`; the mobile app navigates there on tap. Signing out everywhere forgets
+  `data={"url": "/contracts"}`; the mobile app navigates there on tap. Signing out everywhere forgets
   the user's devices. Backends: `PUSH_BACKEND=console|expo|outbox` (`push_outbox` fixture in tests).
-- **Access control** (ADR 0004): check permissions, never roles. Add a `Permission` member and map
-  it to roles in `shared/permissions.py`, then guard the route with
-  `Depends(require_permission(Permission.X))`. Owned data is still filtered by owner in the
-  service. Roles are granted with `uv run python -m app.cli set-role <email> <role>`.
+- **Access control** (ADR 0004): check permissions, never roles. Add a `Permission` member in
+  `shared/permissions.py`, grant it in the Casbin policy `shared/rbac/policy.csv`, then guard the
+  route with `Depends(require_permission(Permission.X))`. Owned data is still filtered by owner in
+  the service. Roles (`accountant`, `director`, `admin`) are granted on the Users screen, or with
+  `uv run python -m app.cli set-roles <email> <roles…>`.
 - **Compatibility** (ADR 0003): change the contract additively. Removing/renaming a field or
   endpoint fails the `api-contract` CI job; follow expand → migrate → `MIN_APP_VERSION` → remove.
   Mobile sends `X-App-Version`; below `MIN_APP_VERSION` every module route answers
@@ -119,7 +121,7 @@ uv run ruff check --fix . && uv run ruff format .
 uv run mypy src                          # strict
 uv run lint-imports && uv run deptry src # layer contracts, declared dependencies
 uv run pytest                            # needs `pnpm infra:up` (real Postgres + Redis)
-uv run pytest tests/test_todos.py -q     # one file while iterating
+uv run pytest tests/test_partners.py -q  # one file while iterating
 ```
 
 Done = `pnpm --filter api lint`, `mypy src`, `alembic check`, `pytest` (and `db:lint` for a new migration) all pass, and `pnpm codegen` was run if any schema/route changed.

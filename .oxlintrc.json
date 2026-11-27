@@ -21,7 +21,8 @@
     {
       "name": "node-js",
       "specifier": "eslint-plugin-n"
-    }
+    },
+    "./tooling/oxlint-eslint-core.mjs"
   ],
   "categories": {
     "correctness": "error",
@@ -165,15 +166,35 @@
     "no-underscore-dangle": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
     "vitest/require-to-throw-message": "off",
-    "node-js/no-process-env": "error"
+    "node-js/no-process-env": "error",
+    "eslint-core/no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.name='t'] Property[key.name='defaultValue']",
+        "message": "A defaultValue hides a missing message from typecheck and shows the raw key; add the message to vi.ts instead."
+      }
+    ]
   },
   "overrides": [
+    {
+      "files": ["packages/i18n/src/locales/**"],
+      "rules": {
+        "eslint-core/no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value=/^\\s*$/]",
+            "message": "i18next renders an empty message as its raw key; write the text or drop the key."
+          }
+        ]
+      }
+    },
     {
       "files": [
         "apps/web/src/app/**",
         "apps/mobile/src/app/**",
         "**/*.config.{js,mjs,cjs,ts,mts}",
-        "**/.dependency-cruiser.cjs"
+        "**/.dependency-cruiser.cjs",
+        "tooling/oxlint-*.mjs"
       ],
       "rules": {
         "import/no-default-export": "off"

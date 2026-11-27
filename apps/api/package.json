@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "uv run fastapi dev src/app/main.py --port 8000",
     "worker": "uv run celery -A app.worker worker -l info",
+    "beat": "uv run celery -A app.worker beat -l info",
     "lint": "uv run ruff check . && uv run ruff format --check . && uv run lint-imports && uv run deptry src",
     "format": "uv run ruff check --fix . && uv run ruff format .",
     "typecheck": "uv run mypy src",

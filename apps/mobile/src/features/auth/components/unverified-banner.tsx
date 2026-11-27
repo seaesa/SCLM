@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Text } from "@/components/ui/text"
 
-/** Shown above the todo list while the account has not confirmed its email. */
+/** Shown on the home screen while the account has not confirmed its email. */
 export function UnverifiedBanner() {
   const { t } = useTranslation()
   const user = useCurrentUser().data

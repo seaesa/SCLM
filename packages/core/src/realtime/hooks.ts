@@ -20,8 +20,8 @@ function subscribe(event: EventName, listener: Listener) {
     on: (e: string, l: Listener) => void
     off: (e: string, l: Listener) => void
   } | null
-  socket?.on(event, listener)
-  return () => socket?.off(event, listener)
+  socket?.on(String(event), listener)
+  return () => socket?.off(String(event), listener)
 }
 
 /**

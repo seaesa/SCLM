@@ -2,6 +2,7 @@ import os
 import sys
 
 from celery import Celery
+from celery.schedules import crontab
 
 from app.core.config import get_settings
 
@@ -29,4 +30,23 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     task_always_eager=settings.environment == "test",
 )
-celery_app.autodiscover_tasks(["app.modules.users", "app.modules.notifications"])
+celery_app.conf.beat_schedule = {
+    # 17:05 UTC is 00:05 in Vietnam: statuses follow the new day before anyone looks.
+    "refresh-contract-statuses": {
+        "task": "app.modules.contracts.tasks.refresh_contract_statuses",
+        "schedule": crontab(hour=17, minute=5),
+    },
+    # Petrolimex changes prices at 15:00 Vietnam time; an hourly sync records them the same day.
+    "sync-fuel-prices": {
+        "task": "app.modules.pricing.tasks.sync_fuel_prices",
+        "schedule": crontab(minute=10),
+    },
+}
+celery_app.autodiscover_tasks(
+    [
+        "app.modules.users",
+        "app.modules.notifications",
+        "app.modules.contracts",
+        "app.modules.pricing",
+    ]
+)

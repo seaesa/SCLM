@@ -69,10 +69,28 @@ export function useApiForm<TInput extends FieldValues, TOutput extends FieldValu
   const form = useZodForm(schema, props)
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      onSuccess?.(await submit(values), values)
+      await submitThen(values, submit, onSuccess)
     } catch (error) {
       applyServerErrors(error, form.setError)
     }
   })
   return { form, onSubmit }
+}
+
+/** Runs `submit`, then `onSuccess` with its result. */
+export async function submitThen<TValues, TResult>(
+  values: TValues,
+  submit: (values: TValues) => Promise<TResult>,
+  onSuccess?: (result: TResult, values: TValues) => void
+) {
+  // Not `onSuccess?.(await submit(values))`: an optional call skips its arguments when the
+  // callee is undefined, so the request would never be sent.
+  const result = await submit(values)
+  onSuccess?.(result, values)
+}
+
+/** The translated message for a failed request, for a toast when no form shows it. */
+export function describeApiError(error: unknown) {
+  const { code, message } = getApiError(error)
+  return translateApiCode(code, message)
 }

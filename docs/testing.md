@@ -47,7 +47,7 @@ What the suite guards (keep this list true when adding tests):
   `FieldError` details; operation ids unique (`test_openapi.py`).
 - **Session:** refresh rotation, reuse detection revoking the family, logout on all devices,
   password change/reset invalidating old tokens, the unverified-email gate, rate limits.
-- **Data:** per-owner isolation (a foreign id answers 404), cursor pagination returning every row
+- **Data:** per-owner isolation (a foreign id answers 404), page-number pagination returning every row
   once, explicit `null` in PATCH bodies → 422.
 - **Side effects:** emails and pushes queued after commit, pushes rendered per device locale,
   dead tokens removed, signing out everywhere stops pushes, realtime delivered only to the owner,

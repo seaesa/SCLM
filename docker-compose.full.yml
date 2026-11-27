@@ -1,28 +1,45 @@
-# The whole stack in containers: `docker compose -f docker-compose.full.yml up --build`
+# The whole stack in containers, as it runs on a server. Used locally as the live environment
+# holding real contract data: `scripts/live.sh` wraps it with the secrets in `.env.live`.
 # Local development stays in docker-compose.yml (infrastructure only, apps on the host).
-name: monorepo-full
+name: sclm-live
 
 x-api-environment: &api-environment
   ENVIRONMENT: production
-  DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/app
+  DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:?}@postgres:5432/sclm
   REDIS_URL: redis://redis:6379/0
   CELERY_BROKER_URL: redis://redis:6379/1
   CELERY_RESULT_BACKEND: redis://redis:6379/2
-  CORS_ORIGINS: http://localhost:3000
-  FRONTEND_URL: http://localhost:3000
+  JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET to a random 32+ character secret}
+  CORS_ORIGINS: ${WEB_ORIGIN:?}
+  FRONTEND_URL: ${WEB_ORIGIN:?}
   EMAIL_BACKEND: smtp
   EMAIL_FROM: no-reply@example.com
   SMTP_HOST: mailpit
   SMTP_PORT: "1025"
   PUSH_BACKEND: expo
+  STORAGE_ENDPOINT_URL: http://rustfs:9000
+  STORAGE_PUBLIC_URL: ${STORAGE_PUBLIC_URL:?}
+  STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?}
+  STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?}
+  STORAGE_BUCKET: sclm-files
+
+x-api-service: &api-service
+  build: ./apps/api
+  restart: unless-stopped
+  environment: *api-environment
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+    rustfs: { condition: service_started }
 
 services:
   postgres:
     image: postgres:18-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: sclm
     volumes: [postgres-data:/var/lib/postgresql]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -31,51 +48,59 @@ services:
 
   redis:
     image: redis:8-alpine
+    restart: unless-stopped
+    volumes: [redis-data:/data]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       retries: 10
 
-  # Catches every email the API sends. Web UI: http://localhost:8025
+  # Catches every email the API sends. Web UI: http://localhost:8125
   mailpit:
     image: axllent/mailpit:v1.27
-    ports: ["8025:8025"]
+    restart: unless-stopped
+    ports: ["127.0.0.1:8125:8025"]
+
+  # Contract files (ADR 0005). Browsers download from it through presigned links.
+  rustfs:
+    image: rustfs/rustfs:latest
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?}
+      RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?}
+    ports: ["127.0.0.1:9100:9000"]
+    volumes: [rustfs-data:/data]
 
   api:
-    build: ./apps/api
+    <<: *api-service
     command:
       - sh
       - -c
       - alembic upgrade head && fastapi run src/app/main.py --host 0.0.0.0 --port 8000
-    environment:
-      <<: *api-environment
-      # Required: production refuses to boot with the development placeholder.
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET to a random 32+ character secret}
-    ports: ["8000:8000"]
-    depends_on:
-      postgres: { condition: service_healthy }
-      redis: { condition: service_healthy }
+    ports: ["127.0.0.1:8100:8000"]
 
   worker:
-    build: ./apps/api
+    <<: *api-service
     command: celery -A app.worker worker -l info --concurrency 2
-    environment:
-      <<: *api-environment
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET to a random 32+ character secret}
-    depends_on:
-      postgres: { condition: service_healthy }
-      redis: { condition: service_healthy }
+
+  # Daily jobs such as contract expiry alerts.
+  beat:
+    <<: *api-service
+    command: celery -A app.worker beat -l info --schedule /tmp/celerybeat-schedule
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        # The browser calls this URL, so it must be reachable from the host.
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        # The browser calls this URL, so it must be reachable from the user's machine.
+        NEXT_PUBLIC_API_URL: ${API_ORIGIN:?}
         NEXT_PUBLIC_APP_ENV: production
-    ports: ["3000:3000"]
+    restart: unless-stopped
+    ports: ["127.0.0.1:3100:3000"]
     depends_on: [api]
 
 volumes:
   postgres-data:
+  redis-data:
+  rustfs-data:

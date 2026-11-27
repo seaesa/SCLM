@@ -10,6 +10,10 @@ RUN npm install --global pnpm@11.25.0
 WORKDIR /repo
 
 FROM base AS deps
+# The root `prepare` script installs git hooks (lefthook), which needs git and a repository.
+# Both stay in this build stage; the runtime image does not inherit them.
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/* && git init -q
 # Only manifests, so a source edit does not bust the dependency layer.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/

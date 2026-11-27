@@ -17,10 +17,10 @@ React Native API:
 src/
   app/                       Expo Router routes only (every file is a screen)
     _layout.tsx              setupApp, fonts, splash, Uniwind theme, Stack.Protected guards, PortalHost
-    (auth)/                  login, register, forgot-password, reset-password (guest-only; index redirects to /login) — same paths as web
-    (app)/                   NativeTabs: index (todos), profile (signed-in only)
+    (auth)/                  login, forgot-password, reset-password (guest-only; index redirects to /login) — same paths as web
+    (app)/                   NativeTabs: index (home: contract work is web-only), profile (signed-in only)
     verify-email.tsx         top level, outside both Stack.Protected guards (a link works signed in or out)
-  features/<feature>/components/   feature UI: auth, todos, preferences, notifications
+  features/<feature>/components/   feature UI: auth, preferences, notifications
   features/<feature>/hooks/        mobile-only hooks of one feature (use-push-registration.ts)
   components/ui/             React Native Reusables components (CLI-managed, aligned to maia)
   components/form/           FormInput, FormRootError (RHF bindings, translated errors)

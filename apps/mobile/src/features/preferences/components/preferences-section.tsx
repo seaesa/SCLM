@@ -1,7 +1,7 @@
 import { View } from "react-native"
 
-import { THEME_MODES, useLocale, usePreferencesStore } from "@workspace/core/preferences"
-import { SUPPORTED_LOCALES, useTranslation } from "@workspace/i18n"
+import { THEME_MODES, usePreferencesStore } from "@workspace/core/preferences"
+import { useTranslation } from "@workspace/i18n"
 
 import { Button } from "@/components/ui/button"
 import { Text } from "@/components/ui/text"
@@ -34,34 +34,20 @@ function Segmented<T extends string>({
   )
 }
 
-/** Language (and optionally theme) pickers backed by the shared preferences store. */
-export function PreferencesSection({ showTheme = true }: { showTheme?: boolean }) {
+/** Theme picker backed by the shared preferences store. */
+export function PreferencesSection() {
   const { t } = useTranslation()
-  const locale = useLocale()
-  const { theme, setLocale, setTheme } = usePreferencesStore()
+  const { theme, setTheme } = usePreferencesStore()
 
   return (
-    <View className="gap-4">
-      <View className="gap-2">
-        <Text className="text-muted-foreground text-sm font-medium">{t("settings.language")}</Text>
-        <Segmented
-          options={SUPPORTED_LOCALES}
-          value={locale}
-          onChange={setLocale}
-          label={(l) => t(`languages.${l}`)}
-        />
-      </View>
-      {showTheme && (
-        <View className="gap-2">
-          <Text className="text-muted-foreground text-sm font-medium">{t("settings.theme")}</Text>
-          <Segmented
-            options={THEME_MODES}
-            value={theme}
-            onChange={setTheme}
-            label={(m) => t(`settings.themes.${m}`)}
-          />
-        </View>
-      )}
+    <View className="gap-2">
+      <Text className="text-muted-foreground text-sm font-medium">{t("settings.theme")}</Text>
+      <Segmented
+        options={THEME_MODES}
+        value={theme}
+        onChange={setTheme}
+        label={(m) => t(`settings.themes.${m}`)}
+      />
     </View>
   )
 }

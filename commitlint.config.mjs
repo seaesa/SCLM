@@ -1,5 +1,5 @@
 /**
- * Conventional Commits: `type(scope): subject`, e.g. `feat(todos): add completed filter`.
+ * Conventional Commits: `type(scope): subject`, e.g. `feat(contracts): add renewal reminder`.
  * Scope is optional; when present it must name a workspace, a feature or a repo-wide area.
  */
 export default {
@@ -18,7 +18,10 @@ export default {
         "theme",
         "auth",
         "users",
-        "todos",
+        "partners",
+        "documents",
+        "contracts",
+        "alerts",
         "realtime",
         "ci",
         "deps",

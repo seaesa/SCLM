@@ -1,0 +1,446 @@
+### USER
+phân tích nghiệp vụ hệ thống quản lý hợp đồng và phù lục (contract management system). tập trung khai thác overview, chi tiết nghiệp vụ và làm rõ yêu cầu với stakeholder
+
+### ASSISTANT
+# Phân tích nghiệp vụ: Hệ thống quản lý Hợp đồng & Phụ lục (Contract Management System)
+
+Dưới đây là bộ phân tích theo đúng 3 lớp bạn yêu cầu: **Overview → Chi tiết nghiệp vụ → Làm rõ yêu cầu với stakeholder**. Vì bạn sắp làm ứng dụng lĩnh vực logistics, các ví dụ tôi sẽ gắn với hợp đồng dịch vụ vận chuyển, hợp đồng nguyên tắc + phụ lục bảng cước — đây là dạng phổ biến nhất trong ngành này.
+
+---
+
+## I. OVERVIEW — Hiểu đúng bản chất bài toán
+
+### 1.1. Hệ thống này thực chất là gì?
+
+Đây là bài toán **CLM (Contract Lifecycle Management)** — quản lý toàn bộ vòng đời hợp đồng: *yêu cầu → soạn thảo → đàm phán → phê duyệt → ký → thực hiện → sửa đổi/phụ lục → thanh lý → lưu trữ*. Sai lầm phổ biến của BA mới là nghĩ đây chỉ là "phần mềm lưu file hợp đồng". Có **2 cấp độ nghiệp vụ** cần phân biệt ngay từ đầu:
+
+| Cấp độ | Nội dung | Độ phức tạp |
+|---|---|---|
+| **L1 – Quản lý hồ sơ** | Lưu trữ, tra cứu, đánh số, cảnh báo hết hạn, phân quyền xem | Thấp |
+| **L2 – Quản lý thực hiện** | Dữ liệu hợp đồng được **cấu trúc hóa** (giá trị, bảng cước, điều khoản thanh toán, milestone) và **đẩy xuống hệ thống khác** (tính cước, công nợ, đặt hàng) | Cao |
+
+👉 **Câu hỏi scope đắt giá nhất bạn phải hỏi sponsor: "Hệ thống dừng ở L1 hay L2?"** — vì effort chênh nhau 3–5 lần.
+
+### 1.2. Pain points điển hình (dùng để validate với khách hàng)
+
+- Hợp đồng theo dõi bằng Excel/Zalo → hết hạn không ai biết, mất doanh thu tái ký.
+- Phụ lục điều chỉnh cước ký xong nằm trong tủ hồ sơ → bộ phận tính cước vẫn dùng giá cũ → **thất thoát doanh thu hoặc xuất sai hóa đơn**.
+- Không rõ ai được duyệt hợp đồng giá trị bao nhiêu → rủi ro pháp lý.
+- Audit/thanh tra tìm hồ sơ mất hàng ngày; không truy vết được "giá này áp dụng theo văn bản nào".
+
+### 1.3. Đối tượng trong phạm vi (cần chốt MVP)
+
+- **Hợp đồng đầu ra** (với khách hàng): HĐ dịch vụ, HĐ nguyên tắc/khung + đơn hàng/PO phát sinh.
+- **Hợp đồng đầu vào** (nhà xe thầu phụ, kho bãi, bảo hiểm hàng hóa).
+- **Phụ lục hợp đồng** (trọng tâm — xem phần II).
+- Hồ sơ liên quan: biên bản nghiệm thu, biên bản thanh lý, thư bảo lãnh, NDA.
+
+### 1.4. Actors & vị trí trong hệ sinh thái
+
+- **Actors:** Sales/Account Manager (soạn), Pháp chế (review điều khoản), Kế toán (giá trị, thanh toán, thuế), Vận hành (thực hiện, dùng cước), Người duyệt (Trưởng bộ phận/GĐ theo ma trận thẩm quyền), Văn thư (số, bản gốc), Admin; phía ngoài: khách hàng/NCC ký đối ứng.
+- **Tích hợp:** CRM (cơ hội → hợp đồng), TMS/ Billing (**bảng cước từ phụ lục → tính cước**), Kế toán/ERP (công nợ, hóa đơn), hệ thống **ký số/e-contract**, DMS (bản scan).
+
+---
+
+## II. CHI TIẾT NGHIỆP VỤ
+
+### 2.1. Vòng đời hợp đồng (Contract Lifecycle)
+
+| # | Giai đoạn | Nghiệp vụ chính | Owner | Output |
+|---|---|---|---|---|
+| 1 | Yêu cầu & soạn thảo | Chọn loại HĐ, sinh từ template + biến (merge field), đánh số nháp | Sales | Bản draft v0.x |
+| 2 | Review nội bộ | Pháp chế soát điều khoản; Kế toán soát giá/thuế/thanh toán; Vận hành soát SLA, phạm vi | Legal/Finance/Ops | Comment, redline, version |
+| 3 | Đàm phán đối tác | Gửi–nhận bản sửa, lưu lịch sử version 2 phía | Sales | Bản thống nhất |
+| 4 | Phê duyệt ký | Theo **ma trận thẩm quyền** (giá trị, loại HĐ, % chiết khấu) | Approver | Lệnh ký |
+| 5 | Ký kết | Ký ướt + scan, hoặc ký điện tử; ghi nhận ngày ký, người ký | Sales/Văn thư | HĐ đã ký |
+| 6 | Hiệu lực & thực hiện | Kích hoạt dữ liệu (cước, milestone) xuống hệ thống downstream; theo dõi lũy kế | Ops/Kế toán | Cước active, lịch thanh toán |
+| 7 | Sửa đổi / gia hạn | **Chỉ qua phụ lục** — không sửa trực tiếp HĐ đã ký | Sales | Phụ lục |
+| 8 | Thanh lý / chấm dứt | Biên bản thanh lý, đối chiếu công nợ còn lại, khóa phát sinh mới | Kế toán/Legal | Trạng thái đóng |
+| 9 | Lưu trữ | Bản gốc + bản số hóa, thời hạn lưu trữ theo quy định (chứng từ kế toán thường 10 năm — xác nhận với kế toán) | Văn thư | Kho hồ sơ |
+
+### 2.2. Phụ lục hợp đồng — phần lõi và cũng là phần dễ sai nhất
+
+**a) Nền tảng pháp lý phải nắm (Bộ luật Dân sự 2015, Điều 403):**
+
+- Phụ lục có hiệu lực như hợp đồng, và nội dung phụ lục **không được trái** với nội dung hợp đồng .
+- Nếu phụ lục có điều khoản trái với hợp đồng thì điều khoản đó **không có hiệu lực**, trừ trường hợp các bên có thỏa thuận khác .
+- Nếu các bên **chấp nhận** điều khoản trái đó thì coi như điều khoản tương ứng trong hợp đồng gốc **đã được sửa đổi** .
+
+**→ Hệ quả thiết kế hệ thống (đây là chỗ BA ăn điểm):**
+1. Phải phân biệt **phụ lục giải thích/chi tiết hóa** (bảng cước đính kèm khi ký, danh mục hàng) và **phụ lục sửa đổi, bổ sung** (đổi giá, gia hạn) — hành vi hệ thống với 2 loại này khác nhau.
+2. Phụ lục sửa đổi phải khai báo **"sửa Điều X, Khoản Y của HĐ gốc"** → hệ thống lưu mapping điều khoản bị thay thế.
+3. Không bao giờ ghi đè hợp đồng gốc. Trạng thái hiện hành = **HĐ gốc + chuỗi phụ lục xếp theo ngày hiệu lực** (effective-dated). Cần truy vết được: "ngày 15/03 cước tuyến A áp giá nào, theo văn bản nào?"
+
+**b) Phân loại phụ lục theo mục đích (dùng làm enum trong hệ thống):**
+
+| Loại | Ví dụ logistics | Ảnh hưởng dữ liệu |
+|---|---|---|
+| Gia hạn thời hạn | Kéo dài HĐ nguyên tắc thêm 12 tháng | Sửa ngày hết hạn |
+| Điều chỉnh giá | Phụ lục bảng cước quý mới, tăng phụ phí xăng dầu | Version bảng cước + ngày hiệu lực |
+| Bổ sung khối lượng/phạm vi | Thêm tuyến, thêm loại container | Thêm dòng dịch vụ |
+| Thay đổi thông tin pháp lý | Khách đổi tên công ty, địa chỉ, người đại diện | Sửa thông tin bên |
+| Đính chính sai sót | Sai số tiền bằng chữ, sai mã số thuế | Sửa metadata |
+
+**c) Vòng đời phụ lục — khác hợp đồng ở 4 điểm phải làm rõ:**
+- Bắt buộc gắn với **một HĐ gốc đã ký/đang hiệu lực** (có cho phép soạn phụ lục khi HĐ gốc chưa ký xong không? → hỏi).
+- Số hiệu riêng theo quy tắc (VD: `01/2026/PL02-HĐVT` — hỏi quy tắc đánh số hiện hành của văn thư).
+- **Ngày hiệu lực riêng**, có thể khác ngày ký (nghiệp vụ backdate rất hay gặp → xem edge cases).
+- Luồng phê duyệt: giống HĐ gốc hay rút gọn? Giá trị phê duyệt tính trên **chênh lệch** hay **lũy kế HĐ + tất cả phụ lục**?
+
+### 2.3. Mô hình dữ liệu khái niệm
+
+```
+Contract (HĐ gốc)
+ ├─ Metadata: số, loại, bên A/B, ngày ký, ngày hiệu lực, ngày hết hạn,
+ │            giá trị, tiền tệ, điều khoản thanh toán, auto-renewal?, owner, trạng thái
+ ├─ Attachment: bản gốc scan/PDF ký số, các version draft
+ ├─ Addendum (1..n) ── loại PL, điều khoản bị sửa, ngày hiệu lực, giá trị delta, file ký
+ ├─ RateTable (nếu L2) ── dòng cước: tuyến, loại xe/container, đơn giá, đơn vị,
+ │                        khoảng hiệu lực [from–to], nguồn (HĐ gốc hay PL số mấy)
+ ├─ PaymentMilestone (1..n) ── đợt, điều kiện, % giá trị, ngày dự kiến
+ └─ RelatedDocs ── biên bản nghiệm thu, thanh lý, bảo lãnh, PO/đơn hàng phát sinh
+```
+
+### 2.4. State machine (chốt với stakeholder bằng sơ đồ này)
+
+**Hợp đồng:** `Nháp → Chờ review → Chờ duyệt → Chờ ký → Đã ký (chưa hiệu lực) → Đang hiệu lực → Hết hạn / Chấm dứt / Thanh lý` — nhánh phụ: `Từ chối`, `Hủy`.
+
+**Phụ lục:** `Nháp → Chờ duyệt → Chờ ký → Hiệu lực → Bị thay thế (bởi PL sau) / Hết hiệu lực theo HĐ`.
+
+**Quy tắc vàng:** HĐ ở trạng thái *Đã ký* trở đi là **read-only** về nội dung — mọi thay đổi đi qua phụ lục. Chỉ bản nháp được sửa, và phải giữ version history.
+
+### 2.5. Business rules trọng yếu (đưa vào BRD dưới dạng bảng BR-xx)
+
+| Mã | Rule | Điểm cần stakeholder xác nhận |
+|---|---|---|
+| BR-01 | Ngày hiệu lực PL ≥ ngày hiệu lực HĐ gốc; PL không vượt quá thời hạn HĐ, **trừ PL gia hạn** | Có cho backdate không? Ai duyệt backdate? |
+| BR-02 | Hai PL chỉnh giá **không được chồng lấn khoảng hiệu lực** trên cùng một dòng cước; PL mới tự supersede PL cũ | Nếu chồng lấn thật (ký nhầm) → chặn hay cảnh báo? |
+| BR-03 | Cảnh báo hết hạn trước X ngày (30/60/90 — configurable), gửi owner + quản lý; HĐ có điều khoản tự động gia hạn thì xử lý riêng | Mốc nào, gửi ai, kênh nào (app/email/Zalo)? |
+| BR-04 | Giá trị lũy kế (HĐ + Σ PL) vượt ngưỡng thẩm quyền → nâng cấp người duyệt | Ngưỡng theo giá trị gốc hay lũy kế? |
+| BR-05 | HĐ/PL hết hiệu lực → cảnh báo hoặc **chặn** tạo đơn hàng/tính cước mới | Chặn cứng hay cho override? Ai được override? |
+| BR-06 | Cước áp dụng theo **ngày phát sinh nghiệp vụ** nằm trong khoảng hiệu lực của version cước | Ngày nào là chuẩn: ngày lấy hàng, ngày giao, hay ngày xuất hóa đơn? |
+| BR-07 | Đa tiền tệ: tỷ giá chốt tại thời điểm ký hay thời điểm thanh toán? | Hỏi kế toán |
+| BR-08 | Phân quyền dữ liệu: Sales chỉ thấy HĐ khách của mình; trường **giá/chiết khấu** nhạy cảm → phân quyền cấp field; log mọi lượt xem/tải | Ai được xem toàn bộ? |
+| BR-09 | Nếu ký điện tử: tuân thủ Luật Giao dịch điện tử 2023 (hiệu lực 01/07/2024)  và Nghị định 23/2025/NĐ-CP về chữ ký điện tử, dịch vụ tin cậy (hiệu lực 10/04/2025)  | Dùng nhà cung cấp nào? Ký ướt song song không? |
+
+### 2.6. Edge cases — danh sách mang đi hỏi (BA giỏi được nhận diện ở đây)
+
+1. Phụ lục **ký ngày 10/04 nhưng hiệu lực từ 01/04** → các đơn hàng 01–10/04 đã tính giá cũ có phải hồi tố (retroactive re-billing) không?
+2. Hai phụ lục ký cùng ngày, cùng sửa một điều khoản → thứ tự ưu tiên?
+3. HĐ tự động gia hạn nhưng phụ lục bảng cước đã hết hạn → gia hạn với giá nào?
+4. Khách đổi tên pháp nhân giữa chừng → phụ lục đổi thông tin hay ký HĐ mới? Công nợ cũ treo vào đâu?
+5. Chấm dứt HĐ khi còn công nợ/đơn hàng đang vận chuyển → trạng thái "chấm dứt nhưng còn nghĩa vụ"?
+6. HĐ khung không có giá trị cố định, phát sinh theo PO → theo dõi lũy kế và cảnh báo vượt trần thế nào?
+7. Chỉ có bản scan, thất lạc bản gốc → hệ thống ghi nhận mức "đủ pháp lý" ra sao?
+8. HĐ gốc ký ướt, phụ lục ký số (hoặc ngược lại) → có chấp nhận không?
+
+### 2.7. Non-functional requirements
+
+Bảo mật dữ liệu giá (mã hóa, watermark file tải xuống), **audit trail đầy đủ** (ai sửa gì lúc nào — bắt buộc vì tính pháp lý), lưu trữ dài hạn theo quy định kế toán, tìm kiếm nhanh cả metadata lẫn nội dung file (cần OCR scan?), phê duyệt trên mobile, SLA từng bước duyệt, migration dữ liệu cũ từ Excel.
+
+---
+
+## III. LÀM RÕ YÊU CẦU VỚI STAKEHOLDER
+
+### 3.1. Stakeholder map — biết mỗi bên quan tâm gì trước khi hỏi
+
+| Stakeholder | Mối quan tâm chính | Artifact cần xin |
+|---|---|---|
+| GĐ/Sponsor | Mục tiêu, ROI, scope, ai chịu trách nhiệm dữ liệu | Định hướng, ngân sách, KPI kỳ vọng |
+| Sales/AM | Soạn nhanh, không bị quy trình hành hạ | Mẫu HĐ đang dùng, cách đàm phán giá |
+| Pháp chế | Điều khoản chuẩn, xử lý PL trái HĐ, thẩm quyền ký | Template chuẩn, quy chế phê duyệt, danh sách người được ủy quyền ký |
+| Kế toán | Giá trị, VAT, tiền tệ, điều khoản thanh toán, đối chiếu công nợ | Quy tắc đánh số chứng từ, chính sách lưu trữ |
+| Vận hành/Billing | Cước nào áp dụng khi nào, nguồn cước | Bảng cước thật + **file Excel theo dõi hiện tại** |
+| Văn thư | Quy tắc số HĐ/PL, quản lý bản gốc | Sổ theo dõi HĐ |
+| IT | Hệ thống hiện có, API, dữ liệu cũ | Sơ đồ hệ thống, sample data |
+
+### 3.2. Bộ câu hỏi làm rõ theo nhóm (checklist phỏng vấn)
+
+**Nhóm 1 — Mục tiêu & phạm vi:**
+- Hệ thống quản lý hồ sơ (L1) hay quản lý thực hiện đến tính cước/công nợ (L2)?
+- Cả HĐ đầu ra lẫn đầu vào, hay MVP chỉ đầu ra? Bao nhiêu loại HĐ, sản lượng bao nhiêu HĐ + PL/năm?
+
+**Nhóm 2 — AS-IS (quan trọng nhất, đừng bỏ qua):**
+- "Anh/chị cho em xin **3 bộ HĐ + phụ lục thật gần nhất, trong đó 1 bộ có điều chỉnh giá**, và file Excel đang theo dõi" — tài liệu thật nói nhiều hơn 2 giờ phỏng vấn.
+- Hôm nay HĐ hết hạn thì điều gì xảy ra? Ai phát hiện? Đã từng thiệt hại bao nhiêu vì giá cũ?
+
+**Nhóm 3 — Phụ lục:**
+- Các loại PL đang dùng? PL có được phép trái HĐ gốc không, thực tế xử lý thế nào? (đối chiếu Điều 403 ở trên)
+- PL có hiệu lực lùi ngày không, tần suất? Cước cũ bị thay thế thì đơn hàng đang dở dang tính sao?
+- Luồng duyệt PL giống hay khác HĐ? Giá trị duyệt là delta hay lũy kế?
+
+**Nhóm 4 — Phê duyệt & phân quyền:**
+- Ma trận thẩm quyền hiện hành (xin văn bản)? Duyệt tuần tự hay song song? Ủy quyền khi đi công tác? SLA mỗi bước, trễ thì escalate cho ai?
+
+**Nhóm 5 — Ký kết:**
+- Ký ướt, ký số, hay cả hai? Nhà cung cấp ký số nào? Thứ tự ký (mình trước hay khách trước)? Ký xong ai upload, bao lâu phải upload?
+
+**Nhóm 6 — Tích hợp & downstream:**
+- Cước từ PL đẩy đi đâu? **Ngày nào quyết định giá áp dụng** (lấy hàng/giao hàng/xuất hóa đơn)? HĐ hết hạn thì chặn đơn hay chỉ cảnh báo?
+
+**Nhóm 7 — Cảnh báo & báo cáo:**
+- Mốc cảnh báo, người nhận, kênh nhận? GĐ muốn xem báo cáo gì hàng tuần (HĐ sắp hết hạn, giá trị đang thực hiện, thời gian duyệt trung bình)?
+
+**Nhóm 8 — Migration & vận hành:**
+- Import bao nhiêu năm dữ liệu cũ? Ai nhập, ai nghiệm thu chất lượng dữ liệu? Bản gốc giấy lưu ở đâu, hệ thống có quản lý vị trí tủ/kho không?
+
+### 3.3. Cách tổ chức elicitation (thứ tự thực hiện)
+
+1. **Document analysis trước** (2–3 ngày): đọc HĐ mẫu, PL thật, sổ Excel, quy chế phê duyệt → tự trả lời được ~40% câu hỏi, chỉ mang câu hỏi còn mở đi phỏng vấn. Stakeholder sẽ đánh giá cao việc bạn không hỏi những gì đã có trong tài liệu.
+2. **Phỏng vấn 1-1** theo stakeholder map (30–45 phút/bên, gửi câu hỏi trước).
+3. **Workshop liên phòng ban** để xử lý mâu thuẫn — mâu thuẫn kinh điển: *Sales muốn duyệt nhanh 1 bước ↔ Pháp chế muốn soát mọi PL ↔ Kế toán muốn chặn cứng khi hết hạn ↔ Vận hành muốn override để không mất khách*. Kỹ thuật: đưa mâu thuẫn về **dữ liệu** (tần suất, giá trị thiệt hại) và để sponsor quyết, ghi rõ vào biên bản.
+4. **Prototype/wireframe** màn hình tạo PL + timeline hiệu lực cước để validate — người dùng nghiệp vụ phản hồi trên hình chính xác hơn nhiều so với đọc tài liệu.
+5. **Sign-off BRD** bằng email/biên bản có danh sách người duyệt.
+
+### 3.4. Ghi nhận & chốt yêu cầu
+
+- **BRD** gồm: bối cảnh, mục tiêu đo được, scope/out-of-scope, AS-IS/TO-BE (sơ đồ BPMN hoặc swimlane), bảng BR, data dictionary, state machine, NFR, **Open Questions Log** (mỗi câu hỏi mở phải có *owner + deadline trả lời*).
+- Mỗi chức năng viết **user story + acceptance criteria**. Ví dụ:
+
+> **US:** Là Sales, tôi muốn tạo phụ lục điều chỉnh cước để giá mới tự áp dụng đúng ngày hiệu lực.
+> **AC:** (1) PL bắt buộc tham chiếu HĐ đang hiệu lực; (2) khoảng hiệu lực dòng cước mới không chồng lấn version cũ — nếu chồng lấn, hệ thống chặn và hiển thị version xung đột; (3) sau khi PL được ký và đến ngày hiệu lực, đơn hàng phát sinh mới dùng giá mới, đơn cũ giữ giá cũ; (4) mọi thay đổi được ghi audit log.
+
+- Sau mỗi buổi họp: gửi **meeting minutes trong 24h**, kèm câu "nếu không có phản hồi trước ngày X, team sẽ chốt theo phương án Y" — kỹ thuật chống treo deadline rất hiệu quả.
+- Sau sign-off: mọi thay đổi đi qua **change request** (impact effort/timeline → sponsor duyệt), không nhận yêu cầu miệng qua Zalo.
+
+---
+
+## IV. Gợi ý kế hoạch thực hiện & báo cáo (gắn với công việc của bạn)
+
+| Bước | Deliverable | Thời lượng gợi ý |
+|---|---|---|
+| 1. Thu thập tài liệu + đọc AS-IS | Danh sách artifact, ghi chú hiện trạng | 2–3 ngày |
+| 2. Phỏng vấn các bên | Biên bản + Open Questions Log | 3–4 ngày |
+| 3. Workshop chốt mâu thuẫn + scope MVP | Biên bản chốt, scope statement | 1 buổi + 1 ngày |
+| 4. Viết BRD + wireframe màn hình lõi (tạo HĐ, tạo PL, timeline cước) | BRD v1.0 | 3–4 ngày |
+| 5. Review & sign-off | BRD approved + baseline | 2 ngày |
+
+**Báo cáo cho GĐ:** mỗi tuần 1 trang — trạng thái RAG (xanh/vàng/đỏ), % hoàn thành theo bảng trên, **top 3 vấn đề cần GĐ quyết** (kèm phương án đề xuất, đừng chỉ nêu vấn đề), rủi ro và kế hoạch tuần tới. Nguyên tắc: *sếp cần quyết định và sự yên tâm, không cần nhật ký chi tiết*.
+
+---
+
+**Điểm mấu chốt cần nhớ:** với hệ thống HĐ & phụ lục, ba thứ quyết định chất lượng phân tích là (1) hiểu **quan hệ pháp lý HĐ gốc – phụ lục** theo Điều 403 để thiết kế version/effective-date đúng, (2) chốt được câu hỏi **L1 hay L2** ngay từ đầu, và (3) khai thác **edge cases backdate/chồng lấn hiệu lực** — nơi 90% bug nghiệp vụ và thất thoát doanh thu sẽ xuất hiện sau này. Nếu bạn muốn, bước tiếp theo tôi có thể giúp bạn dựng template BRD hoàn chỉnh hoặc vẽ sơ đồ BPMN cho luồng "tạo → duyệt → ký phụ lục điều chỉnh cước".
+
+### USER
+sau khi phân tích và làm rõ yêu cầu. với trách nhiệm là 1 BA tôi nên có những tài liệu tối thiểu nào cho 1 hệ thống phần mềm. quản lý hợp đồng ở đây là trong lĩnh vực logistics forwader
+
+### ASSISTANT
+Với vai trò là một Business Analyst (BA) trong lĩnh vực quản lý hợp đồng logistics forwarder, bạn cần chuẩn bị các tài liệu tối thiểu sau để đảm bảo yêu cầu được phân tích và ghi nhận đầy đủ:
+
+---
+
+### 1. **Yêu cầu kinh doanh (Business Requirements)**
+   - **Mô tả tổng quát:** Tóm tắt mục tiêu của hệ thống quản lý hợp đồng.
+   - **Các chức năng chính:** Liệt kê các tính năng cốt lõi mà hệ thống cần hỗ trợ (ví dụ: tạo, chỉnh sửa, theo dõi, phê duyệt hợp đồng; quản lý điều khoản, phí, lịch trình vận chuyển).
+   - **Đối tượng sử dụng:** Xác định rõ ai sẽ sử dụng hệ thống (nhân viên mua hàng, nhân viên kế toán, khách hàng, v.v.).
+   - **Quy trình nghiệp vụ:** Mô tả chi tiết các quy trình liên quan đến hợp đồng như:
+     - Tạo hợp đồng mới.
+     - Theo dõi tiến độ hợp đồng.
+     - Quản lý gia hạn hoặc chấm dứt hợp đồng.
+     - Báo cáo tình trạng hợp đồng.
+
+---
+
+### 2. **Yêu cầu kỹ thuật (Technical Requirements)**
+   - **Giao diện người dùng (UI/UX):** Yêu cầu về cách hiển thị thông tin trên màn hình (bảng điều khiển, biểu đồ, danh sách, v.v.).
+   - **Tính năng cụ thể:**
+     - Hỗ trợ nhập liệu tự động từ các nguồn dữ liệu khác (ERP, CRM, v.v.).
+     - Tích hợp với các công cụ báo cáo và phân tích dữ liệu.
+     - Hỗ trợ đa ngôn ngữ nếu cần thiết.
+   - **Bảo mật:** Các yêu cầu về quyền truy cập, mã hóa dữ liệu, và tuân thủ quy định bảo vệ dữ liệu cá nhân (VD: GDPR, HIPAA, v.v.).
+   - **Kết nối hệ thống:** Giao tiếp API với các hệ thống hiện có (hệ thống ERP, hệ thống thanh toán, v.v.).
+
+---
+
+### 3. **Dữ liệu và cấu trúc dữ liệu**
+   - **Các bảng dữ liệu chính:**
+     - Hợp đồng (Contract): ID hợp đồng, số hợp đồng, ngày ký kết, ngày hết hạn, loại hợp đồng, nhà cung cấp, khách hàng, v.v.
+     - Điều khoản (Terms): Điều khoản chi tiết, giá cả, phương thức thanh toán, thời hạn thanh toán, v.v.
+     - Lịch trình vận chuyển (Shipping Schedule): Thông tin về tuyến đường, thời gian vận chuyển, điểm đón/giao hàng, v.v.
+     - Khách hàng (Customers): Thông tin liên hệ, địa chỉ, thông tin tài khoản, v.v.
+   - **Các mối quan hệ giữa các bảng:** Ví dụ: Một hợp đồng liên kết với nhiều điều khoản, và mỗi điều khoản liên kết với một khách hàng hoặc nhà cung cấp.
+
+---
+
+### 4. **Quy trình nghiệp vụ (Business Processes)**
+   - **Quy trình tạo hợp đồng:**
+     1. Nhân viên mua hàng nhập thông tin khách hàng và nhà cung cấp.
+     2. Lập điều khoản dựa trên yêu cầu của khách hàng.
+     3. Kiểm tra và phê duyệt hợp đồng.
+     4. Lưu trữ hợp đồng vào hệ thống.
+   - **Quy trình theo dõi hợp đồng:**
+     1. Cập nhật trạng thái hợp đồng (đang thực hiện, đã hoàn thành, đang chờ phê duyệt, v.v.).
+     2. Gửi nhắc nhở cho các bên liên quan khi hợp đồng sắp hết hạn.
+     3. Tạo báo cáo về hiệu suất hợp đồng (tỷ lệ hoàn thành, chi phí phát sinh, v.v.).
+   - **Quy trình xử lý tranh chấp:**
+     1. Ghi nhận khiếu nại từ khách hàng hoặc nhà cung cấp.
+     2. Phân tích nguyên nhân và đưa ra giải pháp.
+     3. Cập nhật hồ sơ và lưu lại quyết định cuối cùng.
+
+---
+
+### 5. **Báo cáo và KPIs**
+   - **Báo cáo tổng quan:** Tổng số hợp đồng đang hoạt động, số lượng hợp đồng đã hoàn tất, tỷ lệ hoàn thành mục tiêu.
+   - **Báo cáo chi tiết:** Chi tiết từng hợp đồng, bao gồm điều khoản, giá cả, lịch trình vận chuyển, v.v.
+   - **KPIs liên quan:**
+     - Thời gian xử lý hợp đồng từ lúc bắt đầu đến khi hoàn tất.
+     - Tỷ lệ lỗi trong quá trình nhập liệu hoặc phê duyệt.
+     - Tỷ lệ khách hàng hài lòng với dịch vụ hợp đồng.
+
+---
+
+### 6. **Hồ sơ thử nghiệm (Test Cases)**
+   - **Kiểm tra chức năng:** Đảm bảo các tính năng như tạo hợp đồng, chỉnh sửa, xóa, tìm kiếm đều hoạt động đúng.
+   - **Kiểm tra dữ liệu:** Đảm bảo dữ liệu được lưu trữ chính xác và không bị trùng lặp.
+   - **Kiểm tra bảo mật:** Đảm bảo chỉ những người dùng có quyền mới có thể truy cập hoặc chỉnh sửa dữ liệu nhạy cảm.
+
+---
+
+### 7. **Tài liệu đào tạo và hướng dẫn sử dụng**
+   - **Hướng dẫn sử dụng hệ thống:** Cách đăng nhập, thao tác cơ bản, và các mẹo sử dụng hiệu quả.
+   - **Hướng dẫn dành cho quản trị viên:** Cách cấu hình hệ thống, thêm/xóa người dùng, và quản lý quyền truy cập.
+   - **Video demo:** Hướng dẫn trực quan về cách sử dụng các tính năng chính của hệ thống.
+
+---
+
+### 8. **Phụ lục và tài liệu bổ sung**
+   - **Biểu mẫu hợp đồng mẫu:** Để tham khảo và làm cơ sở cho việc xây dựng hợp đồng.
+   - **Chính sách nội bộ:** Quy định về quản lý hợp đồng, quy trình xử lý tranh chấp, và các quy tắc bảo mật dữ liệu.
+   - **Thỏa thuận SLA (Service Level Agreement):** Định nghĩa rõ ràng về mức độ dịch vụ mong đợi từ nhà cung cấp.
+
+---
+
+Việc chuẩn bị đầy đủ các tài liệu này sẽ giúp đảm bảo rằng hệ thống phần mềm đáp ứng đúng nhu cầu kinh doanh và giảm thiểu rủi ro trong quá trình triển khai.
+
+### USER
+mấu chốt vẫn là đưa toàn bộ hợp đồng từ trước đến nay lên hệ thống xử lý và phân loại thông tin. nhưng vấn đề là mối hợp đồng khách hàng đều khác nhau. bạn có ý tưởng gì để đưa toàn bộ thông tin lên hệ thống không?
+
+### ASSISTANT
+# Ý tưởng đưa toàn bộ hợp đồng legacy lên hệ thống — bài toán "không đồng nhất" trong forwarding
+
+Đây là câu hỏi rất đúng trọng tâm, và là chỗ nhiều dự án CLM thất bại. Tôi sẽ đưa bạn một mô hình tư duy + giải pháp cụ thể để vừa thiết kế được, vừa bảo vệ được trước stakeholder.
+
+---
+
+## 1. Đổi tư duy trước: "khác nhau" ở đâu?
+
+**Insight quan trọng nhất: các hợp đồng khác nhau về câu chữ và trình bày, nhưng hội tụ về ngữ nghĩa nghiệp vụ.**
+
+Hợp đồng khách hàng A ghi "cước biển", khách B ghi "Ocean Freight", khách C ghi "phí vận chuyển đường biển chặng chính" — nhưng với hệ thống, tất cả là **một dòng cước: `OCEAN_FREIGHT`, tuyến X, đơn vị cont40HC, giá Y USD, hiệu lực Z**. Đừng chuẩn hóa *câu chữ của khách* — chuẩn hóa *ý nghĩa nội bộ*.
+
+Từ đó, kiến trúc giải pháp là **tách 2 lớp**:
+
+| Lớp | Nội dung | Nguyên tắc |
+|---|---|---|
+| **Lớp hồ sơ pháp lý** | File gốc PDF/scan của HĐ + toàn bộ phụ lục | Bất biến, lưu 100%, là nguồn sự thật pháp lý. Không bao giờ "diễn giải lại" văn bản |
+| **Lớp dữ liệu nghiệp vụ** | Metadata + điều khoản vận hành + bảng cước đã cấu trúc | Là *diễn giải có kiểm soát* của lớp hồ sơ, luôn truy vết ngược về "điều mấy, trang mấy, file nào" |
+
+👉 Hệ quả: bạn **không cần ép mọi hợp đồng vào một khuôn**. Hợp đồng dị biệt vẫn nằm nguyên trong lớp hồ sơ; lớp dữ liệu chỉ trích những gì hệ thống downstream cần. Câu "mỗi hợp đồng một kiểu" không còn là blocker.
+
+---
+
+## 2. Bước 0 bắt buộc: khảo sát "quần thể" hợp đồng trước khi thiết kế
+
+Đừng thiết kế schema từ trí tưởng tượng. Làm như sau:
+
+1. **Inventory:** gom từ mọi nguồn (Excel sales, email, file server, tủ hồ sơ) → lập danh sách: bao nhiêu hợp đồng, bao nhiêu năm, tỷ lệ có bản mềm/scan/giấy, bao nhiêu còn hiệu lực.
+2. **Sampling:** lấy ngẫu nhiên **30–50 bộ** (HĐ + phụ lục) đủ các loại khách.
+3. **Field coverage matrix:** kẻ bảng *ứng viên trường dữ liệu × hợp đồng mẫu*, đánh dấu trường nào xuất hiện ở đâu. Kết quả sẽ cho bạn thấy quy luật 80/20:
+   - **~80% trường xuất hiện ở mọi hợp đồng** → đưa vào **lõi chung** (bên ký, số, ngày ký/hiệu lực/hết hạn, tiền tệ, điều khoản thanh toán, auto-renewal...).
+   - Trường chỉ có ở một nhóm → đưa vào **extension theo loại hợp đồng**.
+   - Trường hiếm/cá biệt → để dạng **tag/ghi chú +全文 search**, không cấu trúc hóa.
+4. **Phân họ hợp đồng (taxonomy):** với forwarder thường ra 5–8 họ: HĐ nguyên tắc vận chuyển biển/hàng không, HĐ khai thuê hải quan, HĐ kho bãi, HĐ vận tải nội địa, HĐ thầu phụ (nhà xe, hãng tàu, co-loader), HĐ đại lý nước ngoài (agent agreement). **Mỗi họ = một schema extension riêng.**
+
+Đầu ra bước này là một trang slide cực mạnh để báo cáo sếp: *"Sau khảo sát X hợp đồng, 92% rơi vào 6 họ, chỉ 8% cá biệt cần xử lý riêng"* — biến nỗi sợ "mỗi cái một kiểu" thành con số quản trị được.
+
+---
+
+## 3. Mô hình dữ liệu: "Lõi chung + mở rộng theo họ + danh mục dịch vụ chuẩn"
+
+```
+Contract (lõi chung — mọi hợp đồng đều có)
+ ├─ type → trỏ tới schema extension của họ (JSON/field động)
+ ├─ Document[] (file gốc bất biến) + Tag[] + OCR full-text
+ ├─ ClauseChecklist (điều khoản vận hành dạng có cấu trúc)
+ └─ RateLine[] (bảng cước chuẩn hóa, effective-dated, nguồn = HĐ/PL nào)
+```
+
+**Ba vũ khí xử lý tính dị biệt:**
+
+**a) Danh mục dịch vụ chuẩn nội bộ (service catalog)** — trái tim của giải pháp. Forwarder nào cũng có tập dịch vụ hữu hạn: ocean freight, air freight, THC, D/O, vệ sinh cont, khai hải quan, trucking, lưu kho, DEM/DET... Xây danh mục chuẩn + **cột alias** lưu nguyên văn cách gọi của từng khách. Khi nhập liệu, người nhập map "phí XXX của khách A" → `LOCAL_CHARGE_DO`. Khách gọi gì cũng được, hệ thống hiểu theo ngôn ngữ của mình.
+
+**b) RateLine chuẩn hóa** — mọi bảng cước dù trình bày kiểu gì cũng quy về các cột:
+
+| service_code | scope/tuyến | đơn vị tính | giá | tiền tệ | hiệu lực từ–đến | điều kiện/remark | nguồn |
+|---|---|---|---|---|---|---|---|
+| OCEAN_FREIGHT | CNSHA → VNHPH | cont40HC | 850 | USD | 01/01–31/03/2026 | chưa gồm phụ phí | PL02, Điều 1 |
+| CUSTOMS_CLEAR | hàng nhập | tờ khai | 550.000 | VND | 01/01/2026 → | quá 5 dòng hàng +50k/dòng | HĐ gốc, Phụ lục A |
+| TRUCKING | VNHPH → KCN VSIP | chuyến/cont40 | 3.200.000 | VND | ... | chờ cont quá 4h phụ thu | ... |
+
+Phần "điều kiện/remark" chính là van xả cho tính dị biệt: điều kiện lạ nào chưa cấu trúc được thì giữ nguyên văn + flag, không ép.
+
+**c) Clause checklist thay vì "số hóa toàn bộ điều khoản"** — chỉ trích các điều khoản *ảnh hưởng vận hành/tiền bạc*: thanh toán bao nhiêu ngày, free time DEM/DET bao nhiêu ngày, giới hạn trách nhiệm, mức phạt, auto-renewal + số ngày báo trước, bảo hiểm. Dạng câu hỏi có cấu trúc: `auto_renewal = true, notice_days = 30`. Phần văn bản pháp lý còn lại (bất khả kháng, luật áp dụng, trọng tài...) **không cần cấu trúc** — đã có full-text search trên lớp hồ sơ.
+
+---
+
+## 4. Chiến lược phân tầng: "100% lên hệ thống" ≠ "100% được số hóa chi tiết"
+
+Đây là ý tưởng quan trọng nhất để bạn chốt scope với sponsor — phân bổ effort theo giá trị:
+
+| Tier | Tiêu chí | Khối lượng điển hình | Mức xử lý | Effort/bộ (ước lượng, cần pilot kiểm chứng) |
+|---|---|---|---|---|
+| **A – Archive** | Đã hết hạn/thanh lý, chỉ phục vụ tra cứu & audit | ~60–70% | Scan + metadata tối thiểu (số, các bên, ngày, trạng thái) + OCR search | 5–10 phút |
+| **B – Active** | Còn hiệu lực, chưa phát sinh cước tự động | ~20–30% | Lõi chung đầy đủ + clause checklist + cảnh báo hết hạn | 30–60 phút |
+| **C – Revenue-critical** | Còn hiệu lực + có bảng cước đang dùng để tính tiền | ~10–15% | Full: chuỗi HĐ–phụ lục + RateLine effective-dated + đối soát kép | 2–4 giờ |
+
+Thông điệp nói với sếp: *"Toàn bộ 100% hợp đồng sẽ tra cứu được trên hệ thống ngay giai đoạn 1. Nhưng chỉ ~15% hợp đồng đang đẻ ra doanh thu mới cần số hóa sâu — và chính 15% đó chặn được thất thoát cước."* Thay vì một cục migration khổng lồ không biết bao giờ xong, bạn có các mốc giá trị rõ ràng.
+
+Lưu ý thêm: hỏi pháp chế về **độ sâu thời gian cần lưu** (theo thời hiệu khiếu nại/kế toán) — có thể không cần đào lại hợp đồng từ 15 năm trước.
+
+---
+
+## 5. Pipeline thực thi: chạy như một "dây chuyền nhà máy dữ liệu"
+
+```
+Thu thập & khử trùng lặp → Scan/OCR → Trích xuất (AI hỗ trợ) 
+→ Người kiểm tra đối chiếu bản gốc → Chủ hợp đồng (Sales) xác nhận 
+→ Kế toán xác nhận trường tiền → Publish + khóa version
+```
+
+Các điểm thiết kế ăn tiền:
+
+1. **AI/LLM trích xuất trước, người xác nhận sau (human-in-the-loop).** Ở thời điểm hiện tại, dùng LLM đọc hợp đồng tiếng Việt để prefill trường dữ liệu là khả thi và giảm 50–70% thời gian nhập. Nhưng nguyên tắc bất di bất dịch: **trường tiền bạc và ngày hiệu lực không bao giờ auto-commit** — UI xác nhận phải hiển thị *song song bản PDF gốc và dữ liệu trích xuất*, highlight vùng nguồn, AI đánh dấu confidence thấp để người kiểm tra soi kỹ.
+2. **QC theo rủi ro:** trường cước/giá trị → kiểm tra kép 100% (người nhập ≠ người duyệt); metadata thường → xác nhận chủ hợp đồng + hậu kiểm sampling 10–20%. Đặt tiêu chí nghiệm thu dữ liệu, ví dụ: sai lệch trường tiền = 0 trước khi go-live.
+3. **Migrate cả chuỗi HĐ–phụ lục, không chỉ trạng thái cuối:** với Tier C phải nhập đủ chuỗi để trả lời được "giá ngày X theo văn bản nào". Với Tier A/B có thể chỉ cần trạng thái hợp nhất cuối cùng + file toàn bộ chuỗi — đây là một quyết định cần chốt với pháp chế, đừng tự quyết.
+4. **Đối soát nghiệp vụ trước publish:** chạy thử bảng cước đã nhập vào engine tính cước, so với 5–10 hóa đơn thực tế gần nhất của khách đó. Khớp = dữ liệu đúng *theo nghĩa vận hành*, không chỉ đúng *theo nghĩa gõ máy*. Đây là cách nghiệm thu thuyết phục nhất.
+5. **Nhân lực:** BA không tự nhập liệu. Bạn thiết kế form + quy tắc validation + quy trình QC; việc nhập giao cho team nhập liệu tạm thời/intern/outsource, có định mức năng suất đo từ pilot.
+
+---
+
+## 6. Chặn "nợ mới": migration chỉ là dọn nợ quá khứ
+
+Nếu go-live xong mà hợp đồng mới vẫn ký giấy rồi vứt vào tủ, 6 tháng sau bạn lại có một đống legacy. Bắt buộc đi kèm:
+
+- **Hợp đồng mới "sinh ra đã có cấu trúc"**: tạo từ template của họ hợp đồng + form nhập liệu ngay trong hệ thống → ký → dữ liệu có sẵn, không cần trích xuất ngược.
+- Khách hàng đòi dùng mẫu riêng của họ? Cho phép — file khách nằm lớp hồ sơ, nhưng người tạo vẫn phải điền form lõi + checklist. **Hệ thống thích nghi với hợp đồng, không bắt khách ký lại theo khuôn của mình.**
+- Quy định vận hành: Sales có trách nhiệm đưa HĐ ký ngoài về hệ thống trong X ngày; KPI "tỷ lệ hợp đồng có mặt trên hệ thống" báo cáo hàng tháng.
+
+---
+
+## 7. Roadmap đề xuất & cách ước lượng để báo cáo
+
+| Bước | Việc làm | Output | Gợi ý thời gian |
+|---|---|---|---|
+| 1 | Inventory + sampling + field coverage matrix | Taxonomy 5–8 họ, danh sách trường lõi, con số quần thể | 1 tuần |
+| 2 | Thiết kế schema lõi + extension + service catalog | Data dictionary, form nhập liệu | 1 tuần |
+| 3 | **Pilot 30–50 bộ đủ 3 tier** | Định mức phút/bộ thực tế, tỷ lệ lỗi, tinh chỉnh schema | 1–2 tuần |
+| 4 | Nhân rộng theo tier: A trước (nhanh, phủ 100% tra cứu) → B → C | Dữ liệu publish theo lô, có sign-off | Theo định mức pilot × khối lượng |
+| 5 | Đối soát cước Tier C + go-live quy trình "sinh ra đã cấu trúc" | Biên bản nghiệm thu dữ liệu | Song song bước 4 |
+
+Công thức báo cáo sếp: `Tổng effort = Σ (số lượng tier × định mức pilot) + 20–30% dự phòng cho hợp đồng dị biệt`. Có pilot là có số thật, không ai bắt bẻ được ước lượng của bạn — và đây chính là kỹ năng "quản lý deadline và báo cáo" bạn đang cần rèn.
+
+---
+
+**Tóm lại, 5 ý tưởng cốt lõi:** (1) tách lớp hồ sơ bất biến khỏi lớp dữ liệu cấu trúc; (2) chuẩn hóa ngữ nghĩa qua service catalog nội bộ, giữ nguyên văn khách làm alias; (3) phân tầng A/B/C — 100% tra cứu được, chỉ số hóa sâu phần đang đẻ ra tiền; (4) dây chuyền trích xuất AI + người đối chiếu, nghiệm thu bằng cách chạy thử cước so hóa đơn thật; (5) chặn nợ mới bằng quy trình tạo hợp đồng cấu trúc ngay từ đầu.
+
+Nếu bạn muốn, tôi có thể giúp soạn **template khảo sát inventory + field coverage matrix** để bạn mang đi làm bước 1 ngay, hoặc phác thảo **service catalog chuẩn cho forwarder** (biển/air/hải quan/trucking/kho) làm điểm khởi đầu.

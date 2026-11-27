@@ -25,7 +25,7 @@ folder you are about to touch (nested files override this one for their scope). 
 | `apps/mobile`                | iOS/Android UI + device capabilities (Expo, Uniwind, RN Reusables)   | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 |
 | `packages/api-client`        | **Generated** contract: types, Zod schemas, SDK, React Query helpers | [packages/api-client/AGENTS.md](packages/api-client/AGENTS.md) |
 | `packages/core`              | Shared behaviour: feature hooks, form logic, stores, realtime, utils | [packages/core/AGENTS.md](packages/core/AGENTS.md)             |
-| `packages/i18n`              | Every user-visible string, vi + en, type-checked                     | [packages/i18n/AGENTS.md](packages/i18n/AGENTS.md)             |
+| `packages/i18n`              | Every user-visible string (Vietnamese only), type-checked            | [packages/i18n/AGENTS.md](packages/i18n/AGENTS.md)             |
 | `packages/theme`             | Design tokens → generated CSS for web and mobile                     | [packages/theme/AGENTS.md](packages/theme/AGENTS.md)           |
 | `packages/typescript-config` | Shared `tsconfig` presets                                            |                                                                |
 
@@ -63,7 +63,7 @@ the rule wins.
   renders what the server says. Permission, ownership, state transitions and limits are enforced
   in the API even if the UI already hides the button.
 - **Errors are data.** The API answers `{ code, message, details }`; the UI translates `code`, never
-  shows `message`. A new failure case is a new `ErrorCode` member, translated in both languages
+  shows `message`. A new failure case is a new `ErrorCode` member, translated in `packages/i18n`
   (typecheck fails otherwise). See [Errors](#errors) below.
 - **Fewer, better abstractions.** Reuse what exists before adding a helper; add a helper only for a
   second real caller. Do not add a library for something an existing one covers (state → Zustand,
@@ -75,35 +75,35 @@ the rule wins.
 
 ## Where does new code go?
 
-| You need…                                                    | Put it in                                                                                                                                                              |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A business rule, endpoint, field or validation               | `apps/api/src/app/modules/<module>/` → `pnpm codegen`                                                                                                                  |
-| A new failure case                                           | `ErrorCode` in `apps/api/src/app/shared/schemas.py` → `pnpm codegen` → translate in `packages/i18n` (en + vi)                                                          |
-| A hook that reads/writes server data, cache updates, session | `packages/core/src/features/<feature>/hooks.ts`                                                                                                                        |
-| A form's state + submit + server-error mapping               | `packages/core/src/features/<feature>/forms.ts` (`use<Action>Form`), rendered by each app                                                                              |
-| A form schema (generated Zod + UI-only fields)               | `packages/core/src/features/<feature>/schemas.ts`                                                                                                                      |
-| Client state shared by both apps                             | `packages/core/src/features/<feature>/store.ts` (Zustand)                                                                                                              |
-| A pure helper (format, parse, compute) with no feature       | `packages/core/src/lib/`                                                                                                                                               |
-| Push an update to connected clients                          | `Event` in `apps/api/.../<module>/events.py` + `REALTIME_EVENTS` → `pnpm codegen` → `packages/core/src/features/<f>/realtime.ts`, listed in `src/realtime/registry.ts` |
-| A push notification                                          | copy in `apps/api/.../<module>/templates.py` → `NotificationService.notify(user_id, copy)` after commit                                                                |
-| A transactional email                                        | template in `apps/api/.../<module>/templates.py` → `send_email.delay(...)` after commit                                                                                |
-| Background or slow work                                      | Celery task in `apps/api/.../<module>/tasks.py`, enqueued after commit                                                                                                 |
-| UI text                                                      | `packages/i18n/src/locales/en.ts` + `vi.ts`                                                                                                                            |
-| Color / radius / font                                        | `packages/theme/src/tokens.ts` → `pnpm theme`                                                                                                                          |
-| A screen                                                     | `apps/<app>/src/app/…` (routing only) + `apps/<app>/src/features/<feature>/components/`                                                                                |
-| A UI primitive (button, dialog…)                             | CLI only: shadcn (web) / React Native Reusables (mobile) → `src/components/ui`                                                                                         |
-| A device capability (camera, location, push…)                | `apps/mobile/src/lib/<capability>.ts` (setup) + `apps/mobile/src/hooks/use-<capability>.ts` or a feature hook                                                          |
-| A new environment variable                                   | the runtime's env module (`core/config.py`, `apps/<app>/src/lib/env.ts`) + its `.env.development`; deployed values on the platform (ADR 0002)                          |
-| A value the backend owns (limit, path, version)              | the API, exported through OpenAPI → `pnpm codegen`; never copied into the client                                                                                       |
-| A client tunable shared by both apps                         | `packages/core/src/config.ts` (stale times, retries, storage keys)                                                                                                     |
-| A constant used by one feature / one app                     | `features/<feature>/constants.ts` · `apps/<app>/src/config.ts`                                                                                                         |
-| Restrict an action to some users                             | a `Permission` in `apps/api/src/app/shared/permissions.py` mapped to roles → `Depends(require_permission(...))`; hide UI with `useHasPermission` (ADR 0004)            |
-| A change an old mobile build cannot handle                   | additive change first; otherwise expand → migrate → raise `MIN_APP_VERSION` → remove (ADR 0003)                                                                        |
-| A decision that is costly to reverse                         | an ADR in `docs/adr/` before the change                                                                                                                                |
-| A test                                                       | Next to the logic it protects; see [Testing](#testing)                                                                                                                 |
+| You need…                                                    | Put it in                                                                                                                                                                         |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A business rule, endpoint, field or validation               | `apps/api/src/app/modules/<module>/` → `pnpm codegen`                                                                                                                             |
+| A new failure case                                           | `ErrorCode` in `apps/api/src/app/shared/schemas.py` → `pnpm codegen` → translate in `packages/i18n/src/locales/vi.ts`                                                             |
+| A hook that reads/writes server data, cache updates, session | `packages/core/src/features/<feature>/hooks.ts`                                                                                                                                   |
+| A form's state + submit + server-error mapping               | `packages/core/src/features/<feature>/forms.ts` (`use<Action>Form`), rendered by each app                                                                                         |
+| A form schema (generated Zod + UI-only fields)               | `packages/core/src/features/<feature>/schemas.ts`                                                                                                                                 |
+| Client state shared by both apps                             | `packages/core/src/features/<feature>/store.ts` (Zustand)                                                                                                                         |
+| A pure helper (format, parse, compute) with no feature       | `packages/core/src/lib/`                                                                                                                                                          |
+| Push an update to connected clients                          | `Event` in `apps/api/.../<module>/events.py` + `REALTIME_EVENTS` → `pnpm codegen` → `packages/core/src/features/<f>/realtime.ts`, listed in `src/realtime/registry.ts`            |
+| A push notification                                          | copy in `apps/api/.../<module>/templates.py` → `NotificationService.notify(user_id, copy)` after commit                                                                           |
+| A transactional email                                        | template in `apps/api/.../<module>/templates.py` → `send_email.delay(...)` after commit                                                                                           |
+| Background or slow work                                      | Celery task in `apps/api/.../<module>/tasks.py`, enqueued after commit                                                                                                            |
+| UI text                                                      | `packages/i18n/src/locales/vi.ts`                                                                                                                                                 |
+| Color / radius / font                                        | `packages/theme/src/tokens.ts` → `pnpm theme`                                                                                                                                     |
+| A screen                                                     | `apps/<app>/src/app/…` (routing only) + `apps/<app>/src/features/<feature>/components/`                                                                                           |
+| A UI primitive (button, dialog…)                             | CLI only: shadcn (web) / React Native Reusables (mobile) → `src/components/ui`                                                                                                    |
+| A device capability (camera, location, push…)                | `apps/mobile/src/lib/<capability>.ts` (setup) + `apps/mobile/src/hooks/use-<capability>.ts` or a feature hook                                                                     |
+| A new environment variable                                   | the runtime's env module (`core/config.py`, `apps/<app>/src/lib/env.ts`) + its `.env.development`; deployed values on the platform (ADR 0002)                                     |
+| A value the backend owns (limit, path, version)              | the API, exported through OpenAPI → `pnpm codegen`; never copied into the client                                                                                                  |
+| A client tunable shared by both apps                         | `packages/core/src/config.ts` (stale times, retries, storage keys)                                                                                                                |
+| A constant used by one feature / one app                     | `features/<feature>/constants.ts` · `apps/<app>/src/config.ts`                                                                                                                    |
+| Restrict an action to some users                             | a `Permission` in `apps/api/src/app/shared/permissions.py` granted in `rbac/policy.csv` (Casbin) → `Depends(require_permission(...))`; hide UI with `useHasPermission` (ADR 0004) |
+| A change an old mobile build cannot handle                   | additive change first; otherwise expand → migrate → raise `MIN_APP_VERSION` → remove (ADR 0003)                                                                                   |
+| A decision that is costly to reverse                         | an ADR in `docs/adr/` before the change                                                                                                                                           |
+| A test                                                       | Next to the logic it protects; see [Testing](#testing)                                                                                                                            |
 
-Feature names match across layers: `apps/api/.../modules/todos`, `packages/core/src/features/todos`,
-`apps/*/src/features/todos`. A feature folder in an app has `components/` and, only when needed,
+Feature names match across layers: `apps/api/.../modules/partners`, `packages/core/src/features/partners`,
+`apps/*/src/features/partners`. A feature folder in an app has `components/` and, only when needed,
 `hooks/` for UI-only hooks of that feature.
 
 ## Naming
@@ -112,24 +112,24 @@ English only, everywhere: identifiers, files, folders, commits, comments, docs, 
 only Vietnamese allowed is translation content in `packages/i18n/src/locales/vi.ts` and
 user-facing copy in backend `templates.py`.
 
-| Thing                         | Convention                                              | Example                                         |
-| ----------------------------- | ------------------------------------------------------- | ----------------------------------------------- |
-| TS files and folders          | kebab-case; the file is named after its main export     | `use-push-registration.ts`, `todo-item.tsx`     |
-| Python files, functions, vars | snake_case; classes PascalCase                          | `push_enabled_copy`, `NotificationService`      |
-| React components              | PascalCase named export, noun phrase                    | `TodoList`, `DeviceSection`                     |
-| Hooks                         | `use` + what it gives you, not how it works             | `useCurrentUser`, `useTodoList`, `useLoginForm` |
-| Query hooks                   | `use<Entity>` / `use<Entity>s` / `useInfinite<Entity>s` | `useInfiniteTodos`                              |
-| Mutation hooks                | `use<Verb><Entity>`                                     | `useCreateTodo`, `useRegisterPushDevice`        |
-| Form hooks                    | `use<Action>Form` returning `{ form, onSubmit, … }`     | `useResetPasswordForm`                          |
-| Stores                        | `use<Thing>Store`                                       | `useAuthStore`, `usePreferencesStore`           |
-| Booleans                      | `is`/`has`/`can`/`should` + condition                   | `isDone`, `hasNextPage`, `canEdit`              |
-| Event handlers / callbacks    | props `on<Event>`, local handlers `handle<Event>`       | `onCreated`, `handleSubmit`                     |
-| Constants                     | `SCREAMING_SNAKE_CASE` for fixed sets and config        | `TODO_STATUS_FILTERS`, `SUPPORTED_LOCALES`      |
-| API handlers (operationId)    | `verb_noun`, unique across the API → SDK names          | `list_todos` → `listTodos`, `listTodosOptions`  |
-| Realtime events               | `<module>.<past-tense or noun>`                         | `todos.changed`                                 |
-| i18n keys                     | `<feature>.<element>` camelCase, grouped by feature     | `todos.deleteTitle`, `errors.email_taken`       |
+| Thing                         | Convention                                              | Example                                                 |
+| ----------------------------- | ------------------------------------------------------- | ------------------------------------------------------- |
+| TS files and folders          | kebab-case; the file is named after its main export     | `use-push-registration.ts`, `partner-list.tsx`          |
+| Python files, functions, vars | snake_case; classes PascalCase                          | `push_enabled_copy`, `NotificationService`              |
+| React components              | PascalCase named export, noun phrase                    | `PartnerList`, `DeviceSection`                          |
+| Hooks                         | `use` + what it gives you, not how it works             | `useCurrentUser`, `usePartnerList`, `useLoginForm`      |
+| Query hooks                   | `use<Entity>` / `use<Entity>s` / `useInfinite<Entity>s` | `useInfinitePartners`                                   |
+| Mutation hooks                | `use<Verb><Entity>`                                     | `useCreateContract`, `useRegisterPushDevice`            |
+| Form hooks                    | `use<Action>Form` returning `{ form, onSubmit, … }`     | `useResetPasswordForm`                                  |
+| Stores                        | `use<Thing>Store`                                       | `useAuthStore`, `usePreferencesStore`                   |
+| Booleans                      | `is`/`has`/`can`/`should` + condition                   | `isDone`, `hasNextPage`, `canEdit`                      |
+| Event handlers / callbacks    | props `on<Event>`, local handlers `handle<Event>`       | `onCreated`, `handleSubmit`                             |
+| Constants                     | `SCREAMING_SNAKE_CASE` for fixed sets and config        | `PARTNER_ROLE_FILTERS`, `SUPPORTED_LOCALES`             |
+| API handlers (operationId)    | `verb_noun`, unique across the API → SDK names          | `list_partners` → `listPartners`, `listPartnersOptions` |
+| Realtime events               | `<module>.<past-tense or noun>`                         | `contracts.changed`                                     |
+| i18n keys                     | `<feature>.<element>` camelCase, grouped by feature     | `contracts.verify`, `errors.email_taken`                |
 
-Name for the reader who sees only the call site: `useTodoList()` over `useData()`,
+Name for the reader who sees only the call site: `usePartnerList()` over `useData()`,
 `formatRelativeDate` over `fmt`. No abbreviations beyond universal ones (`id`, `url`, `api`).
 Full guide with decision examples: [docs/conventions.md](docs/conventions.md).
 
@@ -160,7 +160,7 @@ Details and fixtures: [docs/testing.md](docs/testing.md).
 
 ## Performance defaults
 
-- Lists are cursor-paginated end to end; never load an unbounded collection.
+- Lists are paginated by page number end to end (ADR 0008); never load an unbounded collection.
 - Every column used to filter or order has an index (review autogenerated migrations).
 - No N+1: load what a response needs in one query per collection.
 - Slow or external work (email, push, third-party calls) is a Celery task, never inside a request.
@@ -184,7 +184,7 @@ Forms get all of this for free through `useApiForm` (`packages/core/src/lib/form
 
 ## Workflow
 
-1. Read the nested `AGENTS.md` of the areas you touch; look at the `todos` feature as the reference.
+1. Read the nested `AGENTS.md` of the areas you touch; look at the `partners` feature as the reference.
 2. Backend first (module → migration → tests → `pnpm codegen`), then `packages/core`, then i18n,
    then both apps. Step-by-step: [docs/adding-a-feature.md](docs/adding-a-feature.md).
 3. Keep the change scoped to the request. Mention unrelated problems instead of fixing them.
@@ -207,7 +207,7 @@ CI (`.github/workflows/ci.yml`) runs the same plus `alembic check` and commitlin
 
 ```bash
 pnpm install && (cd apps/api && uv sync)
-pnpm infra:up                     # Postgres + Redis + Mailpit (docker compose)
+pnpm infra:up                     # Postgres + Redis + Mailpit + RustFS (docker compose)
 pnpm --filter api db:migrate      # apply migrations
 pnpm dev:web | pnpm dev:mobile    # API (8000) + web (3000) | API + Expo (8081)
 pnpm --filter api worker          # Celery worker
@@ -241,7 +241,7 @@ pnpm check                        # everything CI checks except build/doctor
 - Never bypass hooks (`--no-verify`); fix the problem. Never add a disable comment without a
   `-- reason`.
 - A real project word cspell does not know goes in `.cspell/project-words.txt`; a typo gets fixed.
-- Commits: `type(scope): subject` in English, e.g. `feat(todos): add due date`. Scopes are listed
+- Commits: `type(scope): subject` in English, e.g. `feat(api): add partner search`. Scopes are listed
   in `commitlint.config.mjs`.
 
 ## Hard constraints

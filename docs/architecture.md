@@ -41,7 +41,7 @@ module's repository, so the boundary is enforced, not just documented.
    structlog context, and returns it on the response.
 2. **`CORSMiddleware`** answers preflights for the web and Expo origins.
 3. **`MetricsMiddleware`** (when `METRICS_ENABLED`) times the request and counts it by route
-   template, so `/api/v1/todos/{todoId}` is one series instead of one per id.
+   template, so `/api/v1/partners/{partnerId}` is one series instead of one per id.
 4. **Dishka** builds a request-scoped container: one `AsyncSession`, one `UserService`, …
 5. The route runs. Errors are raised as `AppError` subclasses and rendered by the handlers in
    `core/exceptions.py`.
@@ -95,11 +95,11 @@ list refreshes itself without extra code in the screens.
 ## Data access
 
 - `BaseRepository` provides `get`, `find_one`, `list`, `create`, `update`, `delete`.
-- Lists are **cursor paginated** (`limit` + opaque `cursor`), ordered by a stable keyset
-  (`created_at DESC, id DESC`) so a page never repeats or skips a row when new rows arrive.
-  The response is `{ items, nextCursor }`; `nextCursor: null` means the last page.
-- Every todo query is filtered by `owner_id`; a foreign id answers `404`, never `403`, so ids do
-  not leak existence.
+- Lists are **paginated by page number** (`page`, `pageSize` ≤ 100) and answer
+  `{ items, total, page, pageSize }`, ordered by a total order that ends with a unique column
+  (ADR 0008). Append-only feeds read from the newest end (partner sync conflicts) keep a cursor.
+- Access is decided by permissions (`require_permission`), never by hiding ids; an unknown id
+  answers `404`.
 
 ## Observability
 

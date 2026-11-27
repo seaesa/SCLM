@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, Index, String, func
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base, TimestampMixin, UUIDPrimaryKeyMixin
-from app.shared.permissions import ROLE_PERMISSIONS, Permission, Role
+from app.shared.permissions import Permission, Role, permissions_for
 
 
 class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -14,9 +15,8 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     full_name: Mapped[str] = mapped_column(String(255))
     hashed_password: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(default=True)
-    role: Mapped[Role] = mapped_column(
-        String(32), default=Role.MEMBER, server_default=Role.MEMBER.value
-    )
+    # A person can hold several jobs (sales who also verifies scans); no role means no access.
+    roles: Mapped[list[Role]] = mapped_column(ARRAY(String(32)), default=list, server_default="{}")
     email_verified_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), default=None
     )
@@ -29,7 +29,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     @property
     def permissions(self) -> frozenset[Permission]:
-        return ROLE_PERMISSIONS[self.role]
+        return permissions_for(self.roles)
 
 
 # Uniqueness ignores case: `Jane@Example.com` and `jane@example.com` are the same account.

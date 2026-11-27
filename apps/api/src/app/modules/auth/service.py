@@ -6,7 +6,7 @@ from typing import Any, Final, cast
 from redis.asyncio import Redis
 
 from app.core.config import Settings
-from app.core.exceptions import ConflictError, UnauthorizedError
+from app.core.exceptions import ConflictError, ForbiddenError, UnauthorizedError
 from app.core.security import OneShotTokenType, TokenEncoder, verify_password_async
 from app.modules.auth.schemas import LoginRequest, TokenPair
 from app.modules.auth.templates import (
@@ -78,6 +78,8 @@ class AuthService:
         return TokenPair(access_token=access, refresh_token=refresh, expires_in=expires_in)
 
     async def register(self, data: UserCreate, locale: Locale = "en") -> TokenPair:
+        if not self.settings.self_registration_enabled:
+            raise ForbiddenError("Self-registration is disabled")
         user = await self.users.create(data)
         await self._send_verification(user, locale)
         return await self._issue(user)

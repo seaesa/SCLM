@@ -24,15 +24,15 @@ CI regenerates and fails if the committed output differs.
 
 ## Entry points
 
-| Import                        | Contents                                                                                             |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `@workspace/api-client`       | SDK functions (`listTodos`…), all types (`TodoRead`…), `client`, `configureApiClient`, error helpers |
-| `@workspace/api-client/zod`   | Zod schemas (`zTodoCreate`, `zUserCreate`…) with backend constraints                                 |
-| `@workspace/api-client/query` | React Query helpers: `<op>Options`, `<op>QueryKey`, `<op>InfiniteOptions`, `<op>Mutation`            |
+| Import                        | Contents                                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `@workspace/api-client`       | SDK functions (`listPartners`…), all types (`PartnerRead`…), `client`, `configureApiClient`, error helpers |
+| `@workspace/api-client/zod`   | Zod schemas (`zContractCreate`, `zLoginRequest`…) with backend constraints                                 |
+| `@workspace/api-client/query` | React Query helpers: `<op>Options`, `<op>QueryKey`, `<op>InfiniteOptions`, `<op>Mutation`                  |
 
 Responses are **not** validated at runtime (`validator: false`): types and Zod schemas come from
 the same OpenAPI, and a strict runtime check would crash an installed mobile build the day the
 API adds a field. Validate inputs (forms) with the Zod schemas; trust the typed response.
 
-Naming comes from the backend handler name (operationId): `list_todos` → `listTodos`.
+Naming comes from the backend handler name (operationId): `list_partners` → `listPartners`.
 `baseURL` must be the API **origin** (paths include `/api/v1`).

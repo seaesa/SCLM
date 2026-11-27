@@ -18,15 +18,56 @@ Three containers and two managed services:
         └────────────┘
 ```
 
-`docker-compose.full.yml` runs exactly this locally:
+`docker-compose.full.yml` runs exactly this on one machine, as the **live** environment that holds
+the real data (project `sclm-live`, separate from the development stack). `scripts/live.sh` drives
+it:
 
 ```bash
-JWT_SECRET=$(openssl rand -hex 32) \
-  docker compose -f docker-compose.full.yml up --build
+scripts/live.sh init      # writes .env.live (generated secrets, git-ignored); never overwrites
+scripts/live.sh up        # build and start: web :3100, API :8100, files :9100, Mailpit :8125
+scripts/live.sh user <email> "<name>" <role> [roles...]   # prompts for the password
+scripts/live.sh seed [--only step] [--force]  # load the seed bundle (idempotent)
+scripts/live.sh backup [dir]    # database dump + stored files + .env.live, default ~/SCLM-backups
+scripts/live.sh restore <dir>   # replaces the live database and files with a backup
 ```
 
-It migrates the database before the API starts, waits for Postgres and Redis health, and sends
-email through Mailpit (`http://localhost:8025`).
+Every port is bound to `127.0.0.1`. The API migrates the database before it starts.
+
+### Seed bundle
+
+A fresh install is filled from one **seed bundle**: a folder kept outside git (it holds business
+data), with a manifest `seed.json`. Paths in the manifest are relative to the bundle:
+
+```json
+{
+  "version": 1,
+  "users": "seed/users.json",
+  "partners": { "customers": ["customers.json"], "suppliers": ["contractors.json"] },
+  "files": { "customers": ["<scan folder>"], "suppliers": ["<scan folder>"] },
+  "archive": "seed/archive.json",
+  "archiveAuthor": "admin@example.com"
+}
+```
+
+`uv run python -m app.cli seed <bundle>` (or `scripts/live.sh seed`) runs these steps in order:
+
+| Step          | Loads                                                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| `users`       | `users.json` (`email`, `fullName`, `roles`, no passwords): new accounts get a set-password email |
+| `partners`    | the partner exports (until MISA is connected)                                                    |
+| `files`       | every scan, stored once by its content hash with its original path                               |
+| `archive`     | contracts, addenda and renewal chains read from the scans, checked once                          |
+| `fuel-prices` | today's official Petrolimex prices                                                               |
+
+The table `seed_runs` keeps the checksum of each step's input: a step whose input has not changed
+is skipped, so the command can run on every deploy; `--force` reruns it and `--only` picks steps.
+Every step is idempotent either way. `find-file <name or hash>` shows where a scan is stored, and
+`set-password <email>` sets a password when the email cannot be used.
+
+**Moving to a server** is a restore, not a re-entry: copy the latest backup, run
+`scripts/live.sh restore <dir>` there, then change `WEB_ORIGIN`, `API_ORIGIN` and
+`STORAGE_PUBLIC_URL` in `.env.live` to the server addresses. Keep `.env.live` with every backup
+and store backups off the machine.
 
 ## Environment
 
@@ -36,25 +77,29 @@ are no fallbacks in code. Development values are committed (`apps/*/.env.develop
 
 Backend (`apps/api/src/app/core/config.py`):
 
-| Variable                     | Required in production | Notes                                                             |
-| ---------------------------- | ---------------------- | ----------------------------------------------------------------- |
-| `ENVIRONMENT`                | yes                    | `production` turns off `/docs` and enables the strict checks      |
-| `JWT_SECRET`                 | yes                    | ≥ 32 chars; the development placeholder is rejected               |
-| `DATABASE_URL`               | yes                    | `postgresql+asyncpg://…`                                          |
-| `REDIS_URL`                  | yes                    | cache, rate limits, socket fan-out                                |
-| `CELERY_BROKER_URL`          | yes                    | usually a different Redis database                                |
-| `CELERY_RESULT_BACKEND`      | yes                    |                                                                   |
-| `CORS_ORIGINS`               | yes                    | comma separated; empty is rejected in production                  |
-| `FRONTEND_URL`               | yes                    | base URL for links inside emails                                  |
-| `EMAIL_BACKEND`              | yes                    | `smtp` in production (`console` is rejected)                      |
-| `SMTP_HOST` / `SMTP_PORT`    | with smtp              | `SMTP_USERNAME` / `SMTP_PASSWORD` / `SMTP_START_TLS` as needed    |
-| `REQUIRE_EMAIL_VERIFICATION` | no                     | default `true`; business endpoints 403 until verified             |
-| `METRICS_ENABLED`            | no                     | default `true`; see below                                         |
-| `SENTRY_DSN`                 | no                     | empty disables error reporting entirely                           |
-| `RATE_LIMIT_*`               | no                     | attempts per window for login/register/email                      |
-| `PUSH_BACKEND`               | yes (for push)         | `expo` in production; `console` logs, `outbox` is for tests       |
-| `EXPO_ACCESS_TOKEN`          | no                     | only if "enhanced push security" is on in the Expo project        |
-| `MIN_APP_VERSION`            | no                     | older mobile builds get `426 app_update_required` (forced update) |
+| Variable                                    | Required in production | Notes                                                             |
+| ------------------------------------------- | ---------------------- | ----------------------------------------------------------------- |
+| `ENVIRONMENT`                               | yes                    | `production` turns off `/docs` and enables the strict checks      |
+| `JWT_SECRET`                                | yes                    | ≥ 32 chars; the development placeholder is rejected               |
+| `STORAGE_ENDPOINT_URL`                      | yes                    | S3-compatible endpoint the API reaches (RustFS, ADR 0005)         |
+| `STORAGE_ACCESS_KEY` / `STORAGE_SECRET_KEY` | yes                    | Object storage credentials                                        |
+| `STORAGE_BUCKET`                            | yes                    | Bucket for contract files                                         |
+| `STORAGE_PUBLIC_URL`                        | when it differs        | Address browsers use for download links                           |
+| `DATABASE_URL`                              | yes                    | `postgresql+asyncpg://…`                                          |
+| `REDIS_URL`                                 | yes                    | cache, rate limits, socket fan-out                                |
+| `CELERY_BROKER_URL`                         | yes                    | usually a different Redis database                                |
+| `CELERY_RESULT_BACKEND`                     | yes                    |                                                                   |
+| `CORS_ORIGINS`                              | yes                    | comma separated; empty is rejected in production                  |
+| `FRONTEND_URL`                              | yes                    | base URL for links inside emails                                  |
+| `EMAIL_BACKEND`                             | yes                    | `smtp` in production (`console` is rejected)                      |
+| `SMTP_HOST` / `SMTP_PORT`                   | with smtp              | `SMTP_USERNAME` / `SMTP_PASSWORD` / `SMTP_START_TLS` as needed    |
+| `REQUIRE_EMAIL_VERIFICATION`                | no                     | default `true`; business endpoints 403 until verified             |
+| `METRICS_ENABLED`                           | no                     | default `true`; see below                                         |
+| `SENTRY_DSN`                                | no                     | empty disables error reporting entirely                           |
+| `RATE_LIMIT_*`                              | no                     | attempts per window for login/register/email                      |
+| `PUSH_BACKEND`                              | yes (for push)         | `expo` in production; `console` logs, `outbox` is for tests       |
+| `EXPO_ACCESS_TOKEN`                         | no                     | only if "enhanced push security" is on in the Expo project        |
+| `MIN_APP_VERSION`                           | no                     | older mobile builds get `426 app_update_required` (forced update) |
 
 Frontend:
 

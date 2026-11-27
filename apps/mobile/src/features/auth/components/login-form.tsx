@@ -37,12 +37,6 @@ export function LoginForm() {
           {form.formState.isSubmitting ? t("auth.login.submitting") : t("auth.login.submit")}
         </Text>
       </Button>
-      <Text className="text-muted-foreground text-center text-sm">
-        {t("auth.login.noAccount")}{" "}
-        <Link href="/register" className="text-foreground underline">
-          {t("auth.login.createOne")}
-        </Link>
-      </Text>
       <Link href="/forgot-password" className="text-muted-foreground text-center text-sm underline">
         {t("auth.login.forgot")}
       </Link>

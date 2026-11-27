@@ -73,7 +73,7 @@ describe("configureApiClient", () => {
       fail(config, 401, { code: "unauthorized", message: "Session expired" })
     }, tokens)
 
-    const results = await Promise.all([api.listTodos(), api.listTodos()])
+    const results = await Promise.all([api.listPartners(), api.listPartners()])
 
     expect(results.map((result) => result.data)).toEqual([
       { items: [], nextCursor: null },
@@ -94,7 +94,7 @@ describe("configureApiClient", () => {
       fail(config, 401, { code: "unauthorized", message: "Session expired" })
     }, tokens)
 
-    await expect(api.listTodos({ throwOnError: true })).rejects.toThrow()
+    await expect(api.listPartners({ throwOnError: true })).rejects.toThrow()
 
     expect(tokens.getAccessToken()).toBeNull()
     expect(tokens.getRefreshToken()).toBeNull()

@@ -20,7 +20,7 @@ export default async function NotFound() {
           <EmptyTitle>{t("notFound.title")}</EmptyTitle>
           <EmptyDescription>{t("notFound.description")}</EmptyDescription>
         </EmptyHeader>
-        <Link href="/todos" className={buttonVariants({ variant: "outline" })}>
+        <Link href="/" className={buttonVariants({ variant: "outline" })}>
           {t("notFound.home")}
         </Link>
       </Empty>

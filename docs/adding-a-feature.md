@@ -1,6 +1,6 @@
 # Adding a feature
 
-The `todos` feature is the reference implementation: copy its shape. This walkthrough adds a
+The `partners` feature is the reference implementation: copy its shape. This walkthrough adds a
 `notes` feature with the same moving parts.
 
 ## 1. Backend module
@@ -10,7 +10,7 @@ Create `apps/api/src/app/modules/notes/`:
 | File            | Content                                                                        |
 | --------------- | ------------------------------------------------------------------------------ |
 | `models.py`     | `Note(UUIDPrimaryKeyMixin, TimestampMixin, Base)` with `owner_id` FK           |
-| `schemas.py`    | `NoteRead`, `NoteCreate`, `NoteUpdate`, `NoteFilter(CursorParams)`             |
+| `schemas.py`    | `NoteRead`, `NoteCreate`, `NoteUpdate`, `NoteFilter(PageParams)`               |
 | `repository.py` | `NoteRepository(BaseRepository[Note])` with `list_for_owner(owner_id, params)` |
 | `service.py`    | `NoteService(repository, session)` — commit after writes                       |
 | `provider.py`   | `Provider(scope=Scope.REQUEST)` registering repository and service             |
@@ -65,7 +65,7 @@ Commit `packages/api-client`. CI fails if it is stale.
 `src/features/notes/`:
 
 - `keys.ts` — query-key helpers (`noteListKeyPrefix()`), used for invalidation.
-- `hooks.ts` — `useNoteList()` (cursor pagination + filters), mutations with optimistic updates.
+- `hooks.ts` — `useNoteList()` (page number + filters), mutations with optimistic updates.
 - `schemas.ts` — the generated Zod schema plus UI-only fields (`confirmX`) and refinements.
 - `forms.ts` — `useNoteComposerForm({ onCreated })` built on `useApiForm`: schema, defaults,
   submit, reset and server-error mapping, so both apps only render it.
@@ -77,7 +77,7 @@ Add a vitest next to a file only when it holds a decision (cache patching, rollb
 
 ## 6. Text
 
-Add keys to `packages/i18n/src/locales/en.ts` **and** `vi.ts`. No literal copy in components: the
+Add keys to `packages/i18n/src/locales/vi.ts`. No literal copy in components: the
 `vi` file is typed against `en`, so a missing translation fails typecheck.
 
 ## 7. Screens

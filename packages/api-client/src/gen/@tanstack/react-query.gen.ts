@@ -4,8 +4,8 @@ import { type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutation
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { changePassword, createTodo, deleteMe, deleteTodo, forgotPassword, getMe, getTodo, healthCheck, listTodos, listUsers, login, logout, type Options, refreshToken, register, registerPushDevice, resendVerification, resetPassword, sendTestPush, unregisterPushDevice, updateMe, updateTodo, verifyEmail } from '../sdk.gen';
-import type { ChangePasswordData, ChangePasswordError, ChangePasswordResponse, CreateTodoData, CreateTodoError, CreateTodoResponse, DeleteMeData, DeleteMeError, DeleteMeResponse, DeleteTodoData, DeleteTodoError, DeleteTodoResponse, ForgotPasswordData, ForgotPasswordError, ForgotPasswordResponse, GetMeData, GetMeError, GetMeResponse, GetTodoData, GetTodoError, GetTodoResponse, HealthCheckData, HealthCheckError, HealthCheckResponse, ListTodosData, ListTodosError, ListTodosResponse, ListUsersData, ListUsersError, ListUsersResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshTokenData, RefreshTokenError, RefreshTokenResponse, RegisterData, RegisterError, RegisterPushDeviceData, RegisterPushDeviceError, RegisterPushDeviceResponse, RegisterResponse, ResendVerificationData, ResendVerificationError, ResendVerificationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, SendTestPushData, SendTestPushError, UnregisterPushDeviceData, UnregisterPushDeviceError, UnregisterPushDeviceResponse, UpdateMeData, UpdateMeError, UpdateMeResponse, UpdateTodoData, UpdateTodoError, UpdateTodoResponse, VerifyEmailData, VerifyEmailError, VerifyEmailResponse } from '../types.gen';
+import { addContractInstrument, administerUser, approveContractInstrument, assignPartnerOwner, changePassword, correctPriceLine, createContract, createFuelClause, createFuelPrice, createPriceLines, createPriceTable, deleteContract, deleteContractInstrument, deleteFuelPrice, deleteMe, exportContractInstruments, forgotPassword, getContract, getContractPricing, getDocumentFileUrl, getDocumentSet, getFuelAdjustment, getMe, getOverview, getPartner, healthCheck, inviteUser, listContractFields, listContractInstruments, listContracts, listFuelPrices, listPartnerConflicts, listPartnerOwnerCandidates, listPartners, listUsers, login, logout, type Options, refreshToken, register, registerPushDevice, rejectContractInstrument, removeContractFile, resendVerification, resetPassword, resolvePartnerConflict, sendTestPush, sendUserPasswordEmail, setContractInstrumentSigning, submitContractInstrument, syncFuelPrices, unregisterPushDevice, updateMe, uploadDocumentFile, verifyEmail, withdrawFuelClause, withdrawPriceLine, withdrawPriceTable, writeContractFacts } from '../sdk.gen';
+import type { AddContractInstrumentData, AddContractInstrumentError, AddContractInstrumentResponse, AdministerUserData, AdministerUserError, AdministerUserResponse, ApproveContractInstrumentData, ApproveContractInstrumentError, ApproveContractInstrumentResponse, AssignPartnerOwnerData, AssignPartnerOwnerError, AssignPartnerOwnerResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, CorrectPriceLineData, CorrectPriceLineError, CorrectPriceLineResponse, CreateContractData, CreateContractError, CreateContractResponse, CreateFuelClauseData, CreateFuelClauseError, CreateFuelClauseResponse, CreateFuelPriceData, CreateFuelPriceError, CreateFuelPriceResponse, CreatePriceLinesData, CreatePriceLinesError, CreatePriceLinesResponse, CreatePriceTableData, CreatePriceTableError, CreatePriceTableResponse, DeleteContractData, DeleteContractError, DeleteContractInstrumentData, DeleteContractInstrumentError, DeleteContractInstrumentResponse, DeleteContractResponse, DeleteFuelPriceData, DeleteFuelPriceError, DeleteFuelPriceResponse, DeleteMeData, DeleteMeError, DeleteMeResponse, ExportContractInstrumentsData, ExportContractInstrumentsError, ForgotPasswordData, ForgotPasswordError, ForgotPasswordResponse, GetContractData, GetContractError, GetContractPricingData, GetContractPricingError, GetContractPricingResponse, GetContractResponse, GetDocumentFileUrlData, GetDocumentFileUrlError, GetDocumentFileUrlResponse, GetDocumentSetData, GetDocumentSetError, GetDocumentSetResponse, GetFuelAdjustmentData, GetFuelAdjustmentError, GetFuelAdjustmentResponse, GetMeData, GetMeError, GetMeResponse, GetOverviewData, GetOverviewError, GetOverviewResponse, GetPartnerData, GetPartnerError, GetPartnerResponse, HealthCheckData, HealthCheckError, HealthCheckResponse, InviteUserData, InviteUserError, InviteUserResponse, ListContractFieldsData, ListContractFieldsError, ListContractFieldsResponse, ListContractInstrumentsData, ListContractInstrumentsError, ListContractInstrumentsResponse, ListContractsData, ListContractsError, ListContractsResponse, ListFuelPricesData, ListFuelPricesError, ListFuelPricesResponse, ListPartnerConflictsData, ListPartnerConflictsError, ListPartnerConflictsResponse, ListPartnerOwnerCandidatesData, ListPartnerOwnerCandidatesError, ListPartnerOwnerCandidatesResponse, ListPartnersData, ListPartnersError, ListPartnersResponse, ListUsersData, ListUsersError, ListUsersResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshTokenData, RefreshTokenError, RefreshTokenResponse, RegisterData, RegisterError, RegisterPushDeviceData, RegisterPushDeviceError, RegisterPushDeviceResponse, RegisterResponse, RejectContractInstrumentData, RejectContractInstrumentError, RejectContractInstrumentResponse, RemoveContractFileData, RemoveContractFileError, RemoveContractFileResponse, ResendVerificationData, ResendVerificationError, ResendVerificationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResolvePartnerConflictData, ResolvePartnerConflictError, ResolvePartnerConflictResponse, SendTestPushData, SendTestPushError, SendUserPasswordEmailData, SendUserPasswordEmailError, SendUserPasswordEmailResponse, SetContractInstrumentSigningData, SetContractInstrumentSigningError, SetContractInstrumentSigningResponse, SubmitContractInstrumentData, SubmitContractInstrumentError, SubmitContractInstrumentResponse, SyncFuelPricesData, SyncFuelPricesError, SyncFuelPricesResponse, UnregisterPushDeviceData, UnregisterPushDeviceError, UnregisterPushDeviceResponse, UpdateMeData, UpdateMeError, UpdateMeResponse, UploadDocumentFileData, UploadDocumentFileError, UploadDocumentFileResponse, VerifyEmailData, VerifyEmailError, VerifyEmailResponse, WithdrawFuelClauseData, WithdrawFuelClauseError, WithdrawFuelClauseResponse, WithdrawPriceLineData, WithdrawPriceLineError, WithdrawPriceLineResponse, WithdrawPriceTableData, WithdrawPriceTableError, WithdrawPriceTableResponse, WriteContractFactsData, WriteContractFactsError, WriteContractFactsResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -264,14 +264,14 @@ export const listUsersInfiniteQueryKey = (options?: Options<ListUsersData>): Que
  * List Users
  */
 export const listUsersInfiniteOptions = (options?: Options<ListUsersData>) => {
-    const opts = infiniteQueryOptions<ListUsersResponse, AxiosError<ListUsersError>, InfiniteData<ListUsersResponse>, QueryKey<Options<ListUsersData>>, string | null | Pick<QueryKey<Options<ListUsersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    const opts = infiniteQueryOptions<ListUsersResponse, AxiosError<ListUsersError>, InfiniteData<ListUsersResponse>, QueryKey<Options<ListUsersData>>, number | Pick<QueryKey<Options<ListUsersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
         queryFn: async ({ pageParam, queryKey, signal }) => {
             // @ts-ignore
             const page: Pick<QueryKey<Options<ListUsersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
                 query: {
-                    cursor: pageParam
+                    page: pageParam
                 }
             };
             const params = createInfiniteParams(queryKey, page);
@@ -286,6 +286,25 @@ export const listUsersInfiniteOptions = (options?: Options<ListUsersData>) => {
         queryKey: listUsersInfiniteQueryKey(options)
     });
     return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Invite User
+ *
+ * Open an account and email the person a link to set their password.
+ */
+export const inviteUserMutation = (options?: Partial<Options<InviteUserData>>): UseMutationOptions<InviteUserResponse, AxiosError<InviteUserError>, Options<InviteUserData>> => {
+    const mutationOptions: UseMutationOptions<InviteUserResponse, AxiosError<InviteUserError>, Options<InviteUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await inviteUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const getMeQueryKey = (options?: Options<GetMeData>) => createQueryKey('getMe', options);
@@ -332,6 +351,42 @@ export const deleteMeMutation = (options?: Partial<Options<DeleteMeData>>): UseM
     const mutationOptions: UseMutationOptions<DeleteMeResponse, AxiosError<DeleteMeError>, Options<DeleteMeData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await deleteMe({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Administer User
+ */
+export const administerUserMutation = (options?: Partial<Options<AdministerUserData>>): UseMutationOptions<AdministerUserResponse, AxiosError<AdministerUserError>, Options<AdministerUserData>> => {
+    const mutationOptions: UseMutationOptions<AdministerUserResponse, AxiosError<AdministerUserError>, Options<AdministerUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await administerUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Send User Password Email
+ *
+ * Send the set-password link again (lost email, forgotten password).
+ */
+export const sendUserPasswordEmailMutation = (options?: Partial<Options<SendUserPasswordEmailData>>): UseMutationOptions<SendUserPasswordEmailResponse, AxiosError<SendUserPasswordEmailError>, Options<SendUserPasswordEmailData>> => {
+    const mutationOptions: UseMutationOptions<SendUserPasswordEmailResponse, AxiosError<SendUserPasswordEmailError>, Options<SendUserPasswordEmailData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await sendUserPasswordEmail({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -395,14 +450,14 @@ export const sendTestPushMutation = (options?: Partial<Options<SendTestPushData>
     return mutationOptions;
 };
 
-export const listTodosQueryKey = (options?: Options<ListTodosData>) => createQueryKey('listTodos', options);
+export const listPartnersQueryKey = (options?: Options<ListPartnersData>) => createQueryKey('listPartners', options);
 
 /**
- * List Todos
+ * List Partners
  */
-export const listTodosOptions = (options?: Options<ListTodosData>) => queryOptions<ListTodosResponse, AxiosError<ListTodosError>, ListTodosResponse, ReturnType<typeof listTodosQueryKey>>({
+export const listPartnersOptions = (options?: Options<ListPartnersData>) => queryOptions<ListPartnersResponse, AxiosError<ListPartnersError>, ListPartnersResponse, ReturnType<typeof listPartnersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await listTodos({
+        const { data } = await listPartners({
             ...options,
             ...queryKey[0],
             signal,
@@ -410,27 +465,27 @@ export const listTodosOptions = (options?: Options<ListTodosData>) => queryOptio
         });
         return data;
     },
-    queryKey: listTodosQueryKey(options)
+    queryKey: listPartnersQueryKey(options)
 });
 
-export const listTodosInfiniteQueryKey = (options?: Options<ListTodosData>): QueryKey<Options<ListTodosData>> => createQueryKey('listTodos', options, true);
+export const listPartnersInfiniteQueryKey = (options?: Options<ListPartnersData>): QueryKey<Options<ListPartnersData>> => createQueryKey('listPartners', options, true);
 
 /**
- * List Todos
+ * List Partners
  */
-export const listTodosInfiniteOptions = (options?: Options<ListTodosData>) => {
-    const opts = infiniteQueryOptions<ListTodosResponse, AxiosError<ListTodosError>, InfiniteData<ListTodosResponse>, QueryKey<Options<ListTodosData>>, string | null | Pick<QueryKey<Options<ListTodosData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const listPartnersInfiniteOptions = (options?: Options<ListPartnersData>) => {
+    const opts = infiniteQueryOptions<ListPartnersResponse, AxiosError<ListPartnersError>, InfiniteData<ListPartnersResponse>, QueryKey<Options<ListPartnersData>>, number | Pick<QueryKey<Options<ListPartnersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
         queryFn: async ({ pageParam, queryKey, signal }) => {
             // @ts-ignore
-            const page: Pick<QueryKey<Options<ListTodosData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            const page: Pick<QueryKey<Options<ListPartnersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
                 query: {
-                    cursor: pageParam
+                    page: pageParam
                 }
             };
             const params = createInfiniteParams(queryKey, page);
-            const { data } = await listTodos({
+            const { data } = await listPartners({
                 ...options,
                 ...params,
                 signal,
@@ -438,53 +493,19 @@ export const listTodosInfiniteOptions = (options?: Options<ListTodosData>) => {
             });
             return data;
         },
-        queryKey: listTodosInfiniteQueryKey(options)
+        queryKey: listPartnersInfiniteQueryKey(options)
     });
     return opts as Omit<typeof opts, 'initialData'>;
 };
 
-/**
- * Create Todo
- */
-export const createTodoMutation = (options?: Partial<Options<CreateTodoData>>): UseMutationOptions<CreateTodoResponse, AxiosError<CreateTodoError>, Options<CreateTodoData>> => {
-    const mutationOptions: UseMutationOptions<CreateTodoResponse, AxiosError<CreateTodoError>, Options<CreateTodoData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await createTodo({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
+export const listPartnerOwnerCandidatesQueryKey = (options?: Options<ListPartnerOwnerCandidatesData>) => createQueryKey('listPartnerOwnerCandidates', options);
 
 /**
- * Delete Todo
+ * List Partner Owner Candidates
  */
-export const deleteTodoMutation = (options?: Partial<Options<DeleteTodoData>>): UseMutationOptions<DeleteTodoResponse, AxiosError<DeleteTodoError>, Options<DeleteTodoData>> => {
-    const mutationOptions: UseMutationOptions<DeleteTodoResponse, AxiosError<DeleteTodoError>, Options<DeleteTodoData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await deleteTodo({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const getTodoQueryKey = (options: Options<GetTodoData>) => createQueryKey('getTodo', options);
-
-/**
- * Get Todo
- */
-export const getTodoOptions = (options: Options<GetTodoData>) => queryOptions<GetTodoResponse, AxiosError<GetTodoError>, GetTodoResponse, ReturnType<typeof getTodoQueryKey>>({
+export const listPartnerOwnerCandidatesOptions = (options?: Options<ListPartnerOwnerCandidatesData>) => queryOptions<ListPartnerOwnerCandidatesResponse, AxiosError<ListPartnerOwnerCandidatesError>, ListPartnerOwnerCandidatesResponse, ReturnType<typeof listPartnerOwnerCandidatesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getTodo({
+        const { data } = await listPartnerOwnerCandidates({
             ...options,
             ...queryKey[0],
             signal,
@@ -492,16 +513,34 @@ export const getTodoOptions = (options: Options<GetTodoData>) => queryOptions<Ge
         });
         return data;
     },
-    queryKey: getTodoQueryKey(options)
+    queryKey: listPartnerOwnerCandidatesQueryKey(options)
+});
+
+export const getPartnerQueryKey = (options: Options<GetPartnerData>) => createQueryKey('getPartner', options);
+
+/**
+ * Get Partner
+ */
+export const getPartnerOptions = (options: Options<GetPartnerData>) => queryOptions<GetPartnerResponse, AxiosError<GetPartnerError>, GetPartnerResponse, ReturnType<typeof getPartnerQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPartner({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPartnerQueryKey(options)
 });
 
 /**
- * Update Todo
+ * Assign Partner Owner
  */
-export const updateTodoMutation = (options?: Partial<Options<UpdateTodoData>>): UseMutationOptions<UpdateTodoResponse, AxiosError<UpdateTodoError>, Options<UpdateTodoData>> => {
-    const mutationOptions: UseMutationOptions<UpdateTodoResponse, AxiosError<UpdateTodoError>, Options<UpdateTodoData>> = {
+export const assignPartnerOwnerMutation = (options?: Partial<Options<AssignPartnerOwnerData>>): UseMutationOptions<AssignPartnerOwnerResponse, AxiosError<AssignPartnerOwnerError>, Options<AssignPartnerOwnerData>> => {
+    const mutationOptions: UseMutationOptions<AssignPartnerOwnerResponse, AxiosError<AssignPartnerOwnerError>, Options<AssignPartnerOwnerData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateTodo({
+            const { data } = await assignPartnerOwner({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -511,3 +550,751 @@ export const updateTodoMutation = (options?: Partial<Options<UpdateTodoData>>): 
     };
     return mutationOptions;
 };
+
+export const listPartnerConflictsQueryKey = (options?: Options<ListPartnerConflictsData>) => createQueryKey('listPartnerConflicts', options);
+
+/**
+ * List Partner Conflicts
+ */
+export const listPartnerConflictsOptions = (options?: Options<ListPartnerConflictsData>) => queryOptions<ListPartnerConflictsResponse, AxiosError<ListPartnerConflictsError>, ListPartnerConflictsResponse, ReturnType<typeof listPartnerConflictsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listPartnerConflicts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPartnerConflictsQueryKey(options)
+});
+
+export const listPartnerConflictsInfiniteQueryKey = (options?: Options<ListPartnerConflictsData>): QueryKey<Options<ListPartnerConflictsData>> => createQueryKey('listPartnerConflicts', options, true);
+
+/**
+ * List Partner Conflicts
+ */
+export const listPartnerConflictsInfiniteOptions = (options?: Options<ListPartnerConflictsData>) => {
+    const opts = infiniteQueryOptions<ListPartnerConflictsResponse, AxiosError<ListPartnerConflictsError>, InfiniteData<ListPartnerConflictsResponse>, QueryKey<Options<ListPartnerConflictsData>>, string | null | Pick<QueryKey<Options<ListPartnerConflictsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListPartnerConflictsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listPartnerConflicts({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listPartnerConflictsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Resolve Partner Conflict
+ */
+export const resolvePartnerConflictMutation = (options?: Partial<Options<ResolvePartnerConflictData>>): UseMutationOptions<ResolvePartnerConflictResponse, AxiosError<ResolvePartnerConflictError>, Options<ResolvePartnerConflictData>> => {
+    const mutationOptions: UseMutationOptions<ResolvePartnerConflictResponse, AxiosError<ResolvePartnerConflictError>, Options<ResolvePartnerConflictData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await resolvePartnerConflict({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDocumentSetQueryKey = (options: Options<GetDocumentSetData>) => createQueryKey('getDocumentSet', options);
+
+/**
+ * Get Document Set
+ */
+export const getDocumentSetOptions = (options: Options<GetDocumentSetData>) => queryOptions<GetDocumentSetResponse, AxiosError<GetDocumentSetError>, GetDocumentSetResponse, ReturnType<typeof getDocumentSetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDocumentSet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentSetQueryKey(options)
+});
+
+export const getDocumentFileUrlQueryKey = (options: Options<GetDocumentFileUrlData>) => createQueryKey('getDocumentFileUrl', options);
+
+/**
+ * Get Document File Url
+ */
+export const getDocumentFileUrlOptions = (options: Options<GetDocumentFileUrlData>) => queryOptions<GetDocumentFileUrlResponse, AxiosError<GetDocumentFileUrlError>, GetDocumentFileUrlResponse, ReturnType<typeof getDocumentFileUrlQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDocumentFileUrl({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDocumentFileUrlQueryKey(options)
+});
+
+/**
+ * Upload Document File
+ */
+export const uploadDocumentFileMutation = (options?: Partial<Options<UploadDocumentFileData>>): UseMutationOptions<UploadDocumentFileResponse, AxiosError<UploadDocumentFileError>, Options<UploadDocumentFileData>> => {
+    const mutationOptions: UseMutationOptions<UploadDocumentFileResponse, AxiosError<UploadDocumentFileError>, Options<UploadDocumentFileData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await uploadDocumentFile({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listContractFieldsQueryKey = (options?: Options<ListContractFieldsData>) => createQueryKey('listContractFields', options);
+
+/**
+ * List Contract Fields
+ */
+export const listContractFieldsOptions = (options?: Options<ListContractFieldsData>) => queryOptions<ListContractFieldsResponse, AxiosError<ListContractFieldsError>, ListContractFieldsResponse, ReturnType<typeof listContractFieldsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listContractFields({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listContractFieldsQueryKey(options)
+});
+
+export const listContractsQueryKey = (options?: Options<ListContractsData>) => createQueryKey('listContracts', options);
+
+/**
+ * List Contracts
+ */
+export const listContractsOptions = (options?: Options<ListContractsData>) => queryOptions<ListContractsResponse, AxiosError<ListContractsError>, ListContractsResponse, ReturnType<typeof listContractsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listContracts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listContractsQueryKey(options)
+});
+
+export const listContractsInfiniteQueryKey = (options?: Options<ListContractsData>): QueryKey<Options<ListContractsData>> => createQueryKey('listContracts', options, true);
+
+/**
+ * List Contracts
+ */
+export const listContractsInfiniteOptions = (options?: Options<ListContractsData>) => {
+    const opts = infiniteQueryOptions<ListContractsResponse, AxiosError<ListContractsError>, InfiniteData<ListContractsResponse>, QueryKey<Options<ListContractsData>>, number | Pick<QueryKey<Options<ListContractsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListContractsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listContracts({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listContractsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Create Contract
+ *
+ * A contract and its contract document, created together from the uploaded file.
+ */
+export const createContractMutation = (options?: Partial<Options<CreateContractData>>): UseMutationOptions<CreateContractResponse, AxiosError<CreateContractError>, Options<CreateContractData>> => {
+    const mutationOptions: UseMutationOptions<CreateContractResponse, AxiosError<CreateContractError>, Options<CreateContractData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createContract({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listContractInstrumentsQueryKey = (options?: Options<ListContractInstrumentsData>) => createQueryKey('listContractInstruments', options);
+
+/**
+ * List Contract Instruments
+ */
+export const listContractInstrumentsOptions = (options?: Options<ListContractInstrumentsData>) => queryOptions<ListContractInstrumentsResponse, AxiosError<ListContractInstrumentsError>, ListContractInstrumentsResponse, ReturnType<typeof listContractInstrumentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listContractInstruments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listContractInstrumentsQueryKey(options)
+});
+
+export const listContractInstrumentsInfiniteQueryKey = (options?: Options<ListContractInstrumentsData>): QueryKey<Options<ListContractInstrumentsData>> => createQueryKey('listContractInstruments', options, true);
+
+/**
+ * List Contract Instruments
+ */
+export const listContractInstrumentsInfiniteOptions = (options?: Options<ListContractInstrumentsData>) => {
+    const opts = infiniteQueryOptions<ListContractInstrumentsResponse, AxiosError<ListContractInstrumentsError>, InfiniteData<ListContractInstrumentsResponse>, QueryKey<Options<ListContractInstrumentsData>>, number | Pick<QueryKey<Options<ListContractInstrumentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListContractInstrumentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listContractInstruments({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listContractInstrumentsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const exportContractInstrumentsQueryKey = (options?: Options<ExportContractInstrumentsData>) => createQueryKey('exportContractInstruments', options);
+
+/**
+ * Export Contract Instruments
+ *
+ * Every document matching the filters (paging ignored) as an Excel file.
+ */
+export const exportContractInstrumentsOptions = (options?: Options<ExportContractInstrumentsData>) => queryOptions<unknown, AxiosError<ExportContractInstrumentsError>, unknown, ReturnType<typeof exportContractInstrumentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await exportContractInstruments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: exportContractInstrumentsQueryKey(options)
+});
+
+export const exportContractInstrumentsInfiniteQueryKey = (options?: Options<ExportContractInstrumentsData>): QueryKey<Options<ExportContractInstrumentsData>> => createQueryKey('exportContractInstruments', options, true);
+
+/**
+ * Export Contract Instruments
+ *
+ * Every document matching the filters (paging ignored) as an Excel file.
+ */
+export const exportContractInstrumentsInfiniteOptions = (options?: Options<ExportContractInstrumentsData>) => {
+    const opts = infiniteQueryOptions<unknown, AxiosError<ExportContractInstrumentsError>, InfiniteData<unknown>, QueryKey<Options<ExportContractInstrumentsData>>, number | Pick<QueryKey<Options<ExportContractInstrumentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ExportContractInstrumentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await exportContractInstruments({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: exportContractInstrumentsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Delete Contract
+ */
+export const deleteContractMutation = (options?: Partial<Options<DeleteContractData>>): UseMutationOptions<DeleteContractResponse, AxiosError<DeleteContractError>, Options<DeleteContractData>> => {
+    const mutationOptions: UseMutationOptions<DeleteContractResponse, AxiosError<DeleteContractError>, Options<DeleteContractData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteContract({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getContractQueryKey = (options: Options<GetContractData>) => createQueryKey('getContract', options);
+
+/**
+ * Get Contract
+ */
+export const getContractOptions = (options: Options<GetContractData>) => queryOptions<GetContractResponse, AxiosError<GetContractError>, GetContractResponse, ReturnType<typeof getContractQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getContract({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getContractQueryKey(options)
+});
+
+/**
+ * Add Contract Instrument
+ */
+export const addContractInstrumentMutation = (options?: Partial<Options<AddContractInstrumentData>>): UseMutationOptions<AddContractInstrumentResponse, AxiosError<AddContractInstrumentError>, Options<AddContractInstrumentData>> => {
+    const mutationOptions: UseMutationOptions<AddContractInstrumentResponse, AxiosError<AddContractInstrumentError>, Options<AddContractInstrumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await addContractInstrument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Submit Contract Instrument
+ */
+export const submitContractInstrumentMutation = (options?: Partial<Options<SubmitContractInstrumentData>>): UseMutationOptions<SubmitContractInstrumentResponse, AxiosError<SubmitContractInstrumentError>, Options<SubmitContractInstrumentData>> => {
+    const mutationOptions: UseMutationOptions<SubmitContractInstrumentResponse, AxiosError<SubmitContractInstrumentError>, Options<SubmitContractInstrumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await submitContractInstrument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Approve Contract Instrument
+ */
+export const approveContractInstrumentMutation = (options?: Partial<Options<ApproveContractInstrumentData>>): UseMutationOptions<ApproveContractInstrumentResponse, AxiosError<ApproveContractInstrumentError>, Options<ApproveContractInstrumentData>> => {
+    const mutationOptions: UseMutationOptions<ApproveContractInstrumentResponse, AxiosError<ApproveContractInstrumentError>, Options<ApproveContractInstrumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveContractInstrument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Reject Contract Instrument
+ */
+export const rejectContractInstrumentMutation = (options?: Partial<Options<RejectContractInstrumentData>>): UseMutationOptions<RejectContractInstrumentResponse, AxiosError<RejectContractInstrumentError>, Options<RejectContractInstrumentData>> => {
+    const mutationOptions: UseMutationOptions<RejectContractInstrumentResponse, AxiosError<RejectContractInstrumentError>, Options<RejectContractInstrumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await rejectContractInstrument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Set Contract Instrument Signing
+ */
+export const setContractInstrumentSigningMutation = (options?: Partial<Options<SetContractInstrumentSigningData>>): UseMutationOptions<SetContractInstrumentSigningResponse, AxiosError<SetContractInstrumentSigningError>, Options<SetContractInstrumentSigningData>> => {
+    const mutationOptions: UseMutationOptions<SetContractInstrumentSigningResponse, AxiosError<SetContractInstrumentSigningError>, Options<SetContractInstrumentSigningData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setContractInstrumentSigning({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Write Contract Facts
+ */
+export const writeContractFactsMutation = (options?: Partial<Options<WriteContractFactsData>>): UseMutationOptions<WriteContractFactsResponse, AxiosError<WriteContractFactsError>, Options<WriteContractFactsData>> => {
+    const mutationOptions: UseMutationOptions<WriteContractFactsResponse, AxiosError<WriteContractFactsError>, Options<WriteContractFactsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await writeContractFacts({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Remove Contract File
+ */
+export const removeContractFileMutation = (options?: Partial<Options<RemoveContractFileData>>): UseMutationOptions<RemoveContractFileResponse, AxiosError<RemoveContractFileError>, Options<RemoveContractFileData>> => {
+    const mutationOptions: UseMutationOptions<RemoveContractFileResponse, AxiosError<RemoveContractFileError>, Options<RemoveContractFileData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await removeContractFile({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Contract Instrument
+ */
+export const deleteContractInstrumentMutation = (options?: Partial<Options<DeleteContractInstrumentData>>): UseMutationOptions<DeleteContractInstrumentResponse, AxiosError<DeleteContractInstrumentError>, Options<DeleteContractInstrumentData>> => {
+    const mutationOptions: UseMutationOptions<DeleteContractInstrumentResponse, AxiosError<DeleteContractInstrumentError>, Options<DeleteContractInstrumentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteContractInstrument({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getContractPricingQueryKey = (options: Options<GetContractPricingData>) => createQueryKey('getContractPricing', options);
+
+/**
+ * Get Contract Pricing
+ */
+export const getContractPricingOptions = (options: Options<GetContractPricingData>) => queryOptions<GetContractPricingResponse, AxiosError<GetContractPricingError>, GetContractPricingResponse, ReturnType<typeof getContractPricingQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getContractPricing({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getContractPricingQueryKey(options)
+});
+
+export const getFuelAdjustmentQueryKey = (options: Options<GetFuelAdjustmentData>) => createQueryKey('getFuelAdjustment', options);
+
+/**
+ * Get Fuel Adjustment
+ */
+export const getFuelAdjustmentOptions = (options: Options<GetFuelAdjustmentData>) => queryOptions<GetFuelAdjustmentResponse, AxiosError<GetFuelAdjustmentError>, GetFuelAdjustmentResponse, ReturnType<typeof getFuelAdjustmentQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getFuelAdjustment({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getFuelAdjustmentQueryKey(options)
+});
+
+/**
+ * Create Price Table
+ */
+export const createPriceTableMutation = (options?: Partial<Options<CreatePriceTableData>>): UseMutationOptions<CreatePriceTableResponse, AxiosError<CreatePriceTableError>, Options<CreatePriceTableData>> => {
+    const mutationOptions: UseMutationOptions<CreatePriceTableResponse, AxiosError<CreatePriceTableError>, Options<CreatePriceTableData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createPriceTable({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Withdraw Price Table
+ */
+export const withdrawPriceTableMutation = (options?: Partial<Options<WithdrawPriceTableData>>): UseMutationOptions<WithdrawPriceTableResponse, AxiosError<WithdrawPriceTableError>, Options<WithdrawPriceTableData>> => {
+    const mutationOptions: UseMutationOptions<WithdrawPriceTableResponse, AxiosError<WithdrawPriceTableError>, Options<WithdrawPriceTableData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await withdrawPriceTable({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Create Price Lines
+ */
+export const createPriceLinesMutation = (options?: Partial<Options<CreatePriceLinesData>>): UseMutationOptions<CreatePriceLinesResponse, AxiosError<CreatePriceLinesError>, Options<CreatePriceLinesData>> => {
+    const mutationOptions: UseMutationOptions<CreatePriceLinesResponse, AxiosError<CreatePriceLinesError>, Options<CreatePriceLinesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createPriceLines({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Correct Price Line
+ */
+export const correctPriceLineMutation = (options?: Partial<Options<CorrectPriceLineData>>): UseMutationOptions<CorrectPriceLineResponse, AxiosError<CorrectPriceLineError>, Options<CorrectPriceLineData>> => {
+    const mutationOptions: UseMutationOptions<CorrectPriceLineResponse, AxiosError<CorrectPriceLineError>, Options<CorrectPriceLineData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await correctPriceLine({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Withdraw Price Line
+ */
+export const withdrawPriceLineMutation = (options?: Partial<Options<WithdrawPriceLineData>>): UseMutationOptions<WithdrawPriceLineResponse, AxiosError<WithdrawPriceLineError>, Options<WithdrawPriceLineData>> => {
+    const mutationOptions: UseMutationOptions<WithdrawPriceLineResponse, AxiosError<WithdrawPriceLineError>, Options<WithdrawPriceLineData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await withdrawPriceLine({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Create Fuel Clause
+ */
+export const createFuelClauseMutation = (options?: Partial<Options<CreateFuelClauseData>>): UseMutationOptions<CreateFuelClauseResponse, AxiosError<CreateFuelClauseError>, Options<CreateFuelClauseData>> => {
+    const mutationOptions: UseMutationOptions<CreateFuelClauseResponse, AxiosError<CreateFuelClauseError>, Options<CreateFuelClauseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createFuelClause({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Withdraw Fuel Clause
+ */
+export const withdrawFuelClauseMutation = (options?: Partial<Options<WithdrawFuelClauseData>>): UseMutationOptions<WithdrawFuelClauseResponse, AxiosError<WithdrawFuelClauseError>, Options<WithdrawFuelClauseData>> => {
+    const mutationOptions: UseMutationOptions<WithdrawFuelClauseResponse, AxiosError<WithdrawFuelClauseError>, Options<WithdrawFuelClauseData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await withdrawFuelClause({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listFuelPricesQueryKey = (options?: Options<ListFuelPricesData>) => createQueryKey('listFuelPrices', options);
+
+/**
+ * List Fuel Prices
+ */
+export const listFuelPricesOptions = (options?: Options<ListFuelPricesData>) => queryOptions<ListFuelPricesResponse, AxiosError<ListFuelPricesError>, ListFuelPricesResponse, ReturnType<typeof listFuelPricesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listFuelPrices({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listFuelPricesQueryKey(options)
+});
+
+export const listFuelPricesInfiniteQueryKey = (options?: Options<ListFuelPricesData>): QueryKey<Options<ListFuelPricesData>> => createQueryKey('listFuelPrices', options, true);
+
+/**
+ * List Fuel Prices
+ */
+export const listFuelPricesInfiniteOptions = (options?: Options<ListFuelPricesData>) => {
+    const opts = infiniteQueryOptions<ListFuelPricesResponse, AxiosError<ListFuelPricesError>, InfiniteData<ListFuelPricesResponse>, QueryKey<Options<ListFuelPricesData>>, number | Pick<QueryKey<Options<ListFuelPricesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListFuelPricesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listFuelPrices({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listFuelPricesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Create Fuel Price
+ */
+export const createFuelPriceMutation = (options?: Partial<Options<CreateFuelPriceData>>): UseMutationOptions<CreateFuelPriceResponse, AxiosError<CreateFuelPriceError>, Options<CreateFuelPriceData>> => {
+    const mutationOptions: UseMutationOptions<CreateFuelPriceResponse, AxiosError<CreateFuelPriceError>, Options<CreateFuelPriceData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createFuelPrice({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Sync Fuel Prices
+ *
+ * Fetch the prices Petrolimex publishes now (the hourly job does the same).
+ */
+export const syncFuelPricesMutation = (options?: Partial<Options<SyncFuelPricesData>>): UseMutationOptions<SyncFuelPricesResponse, AxiosError<SyncFuelPricesError>, Options<SyncFuelPricesData>> => {
+    const mutationOptions: UseMutationOptions<SyncFuelPricesResponse, AxiosError<SyncFuelPricesError>, Options<SyncFuelPricesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await syncFuelPrices({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Fuel Price
+ */
+export const deleteFuelPriceMutation = (options?: Partial<Options<DeleteFuelPriceData>>): UseMutationOptions<DeleteFuelPriceResponse, AxiosError<DeleteFuelPriceError>, Options<DeleteFuelPriceData>> => {
+    const mutationOptions: UseMutationOptions<DeleteFuelPriceResponse, AxiosError<DeleteFuelPriceError>, Options<DeleteFuelPriceData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteFuelPrice({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getOverviewQueryKey = (options?: Options<GetOverviewData>) => createQueryKey('getOverview', options);
+
+/**
+ * Get Overview
+ */
+export const getOverviewOptions = (options?: Options<GetOverviewData>) => queryOptions<GetOverviewResponse, AxiosError<GetOverviewError>, GetOverviewResponse, ReturnType<typeof getOverviewQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getOverview({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getOverviewQueryKey(options)
+});

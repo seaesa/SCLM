@@ -18,11 +18,11 @@ come from `@workspace/core`; API types from `@workspace/api-client`.
 ```
 src/
   app/                    routes only (thin): layouts, pages, metadata
-    (auth)/login|register|forgot-password|reset-password   guest-only (AuthGate require="guest")
-    (app)/todos           signed-in pages (AuthGate require="auth")
+    (auth)/login|forgot-password|reset-password   guest-only (accounts are created by an admin) (AuthGate require="guest")
+    (app)/<feature>       signed-in pages: contracts, documents, lookup, partners, fuel-prices, admin (AuthGate require="auth")
     verify-email/         outside both groups: a verification link works signed in or out
     error.tsx global-error.tsx not-found.tsx   rendered by the App Router
-  features/<feature>/components/   feature UI (client components): auth, todos, preferences
+  features/<feature>/components/   feature UI (client components): auth, partners, documents, contracts, pricing, users, preferences
   components/ui/          shadcn components (CLI-managed)
   components/form/        FormInput, FormRootError (RHF bindings, translated errors)
   components/             providers.tsx, theme-provider.tsx
@@ -35,8 +35,8 @@ src/
 
 - Pages in `src/app` stay thin: compose feature components, export `metadata`. Interactive code lives in `features/*/components` with `"use client"`.
 - Auth is token-based in client storage, so route protection is client-side via `AuthGate` (route-group layouts). Do not read tokens in Server Components.
-- Data: use hooks from `@workspace/core/<feature>` (`useTodos`, `useCreateTodo`, …). If a hook is missing, add it to `packages/core`, not here. Never call `axios`/`fetch` directly for the backend.
-- Forms: take `{ form, onSubmit }` from the core form hook (`useLoginForm()`, `useTodoComposerForm({ onCreated })`) and render `FormInput` + `FormRootError`. Submit, success state and server errors are already handled there; web-only reactions (a toast, a redirect) go in the hook's callback.
+- Data: use hooks from `@workspace/core/<feature>` (`usePartnerList`, `useCreateContract`, …). If a hook is missing, add it to `packages/core`, not here. Never call `axios`/`fetch` directly for the backend.
+- Forms: take `{ form, onSubmit }` from the core form hook (`useLoginForm()`, `useFieldValueForm({ …, onSaved })`) and render `FormInput` + `FormRootError`. Submit, success state and server errors are already handled there; web-only reactions (a toast, a redirect) go in the hook's callback.
 - UI primitives live in `@/components/ui/*`. Add new ones with the shadcn CLI (`pnpm dlx shadcn@latest add <name> -c apps/web`); never hand-write or copy them. Answer **No** when it asks to overwrite existing files (they may contain fixes). Then run `pnpm theme` (root) to make sure the CLI did not write tokens into `globals.css`. Style `base-maia` uses **Base UI**: compose with the `render` prop (e.g. `<DropdownMenuTrigger render={<Button />}>`), not `asChild`.
 - Icons: `@hugeicons/react` + `@hugeicons/core-free-icons`. Toasts: `toast` from `sonner`.
 - Styling: Tailwind v4 utilities + shared tokens (`bg-background`, `text-muted-foreground`, …) from `packages/theme`. No hard-coded colors, no CSS modules. Merge classes with `cn`.
@@ -44,8 +44,8 @@ src/
 - Theme mode and language are user preferences in `@workspace/core/preferences`; `PreferencesSync` forwards them to next-themes, `<html lang>` and the cookie. Do not call next-themes `setTheme` directly.
 - Workspace packages are compiled via `transpilePackages` in `next.config.ts`; add new internal packages there.
 - `typedRoutes` is on: links must point to existing routes.
-- Lists use the core list hook (`useTodoList()` → `todos`, `status`, `setStatus`, query state) and a "Load more" button while `hasNextPage`. Toggle and delete are optimistic (the shared hooks roll back on error); a destructive action asks for confirmation in an `AlertDialog`.
-- Loading, empty and error states are part of the screen: `TodoListSkeleton` while pending, an `Empty` block, and a retry action on error. Route-level failures are caught by `app/error.tsx`; `global-error.tsx` replaces the root layout, so it uses inline styles only.
+- Lists use the core list hook (`usePartnerList()` → `items`, `search`, `role`, query state) and a "Load more" button while `hasNextPage`. A destructive action asks for confirmation in an `AlertDialog`.
+- Loading, empty and error states are part of the screen: skeleton rows while pending, an `Empty` block, and a retry action on error. Route-level failures are caught by `app/error.tsx`; `global-error.tsx` replaces the root layout, so it uses inline styles only.
 - Env: read only through `src/lib/env.ts` (t3-env, validated at build and start; `process.env` elsewhere is a lint error). `NEXT_PUBLIC_*` values are inlined at build time. App constants (cookie names, ages) live in `src/config.ts`.
 - Errors go to Sentry when `NEXT_PUBLIC_SENTRY_DSN` is set (`instrumentation*.ts`, `lib/monitoring.ts`; `error.tsx` / `global-error.tsx` report what they catch).
 - React Query Devtools render only when `env.NODE_ENV === "development"`.

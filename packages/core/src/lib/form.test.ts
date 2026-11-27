@@ -1,6 +1,7 @@
+// The expected messages are the Vietnamese UI text: cspell:disable
 import { describe, expect, it, vi } from "vitest"
 
-import { applyServerErrors, translateApiCode } from "./form"
+import { applyServerErrors, submitThen, translateApiCode } from "./form"
 
 /** The shape `isAxiosError` recognises, so no real HTTP call is needed. */
 function apiError(data: unknown) {
@@ -14,13 +15,13 @@ function setErrorSpy() {
 describe("translateApiCode", () => {
   it("translates a backend error code", () => {
     expect(translateApiCode("email_taken", "Email already registered")).toBe(
-      "This email is already registered"
+      "Email này đã được đăng ký"
     )
   })
 
   it("translates a pydantic error type with its params", () => {
     expect(translateApiCode("string_too_short", "too short", { min_length: 8 })).toBe(
-      "Must be at least 8 characters"
+      "Cần ít nhất 8 ký tự"
     )
   })
 
@@ -51,7 +52,7 @@ describe("applyServerErrors", () => {
 
     expect(setError).toHaveBeenCalledExactlyOnceWith("email", {
       type: "server",
-      message: "This email is already registered",
+      message: "Email này đã được đăng ký",
     })
   })
 
@@ -76,7 +77,7 @@ describe("applyServerErrors", () => {
 
     expect(setError).toHaveBeenCalledExactlyOnceWith("password", {
       type: "server",
-      message: "Must be at least 8 characters",
+      message: "Cần ít nhất 8 ký tự",
     })
   })
 
@@ -90,7 +91,7 @@ describe("applyServerErrors", () => {
 
     expect(setError).toHaveBeenCalledExactlyOnceWith("root.server", {
       type: "server",
-      message: "Invalid email or password",
+      message: "Email hoặc mật khẩu không đúng",
     })
   })
 
@@ -101,7 +102,27 @@ describe("applyServerErrors", () => {
 
     expect(setError).toHaveBeenCalledExactlyOnceWith("root.server", {
       type: "server",
-      message: "Cannot reach the server. Check your connection.",
+      message: "Không kết nối được máy chủ. Kiểm tra lại mạng.",
     })
+  })
+})
+
+describe("submitThen", () => {
+  it("submits even when no success callback is given", async () => {
+    const submit = vi.fn<(values: { email: string }) => Promise<string>>(
+      async (values) => values.email
+    )
+
+    await submitThen({ email: "a@example.com" }, submit)
+
+    expect(submit).toHaveBeenCalledWith({ email: "a@example.com" })
+  })
+
+  it("passes the result and values to the success callback", async () => {
+    const onSuccess = vi.fn<(result: string, values: { id: number }) => void>()
+
+    await submitThen({ id: 1 }, async () => "ok", onSuccess)
+
+    expect(onSuccess).toHaveBeenCalledWith("ok", { id: 1 })
   })
 })

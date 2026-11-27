@@ -29,7 +29,7 @@ src/
 ## Rules
 
 - **Platform-agnostic only.** No imports from `react-native`, `expo-*`, `next/*`, DOM-only APIs, or UI kits. Platform specifics are injected by the app (e.g. `storage` in `setupCore`).
-- Build hooks by spreading generated helpers: `useQuery({ ...listTodosOptions({ query }) })`, `useMutation({ ...createTodoMutation(), onSettled })`. Do not write `queryFn`/`queryKey` by hand.
+- Build hooks by spreading generated helpers: `useQuery({ ...getPartnerOptions({ path }) })`, `useMutation({ ...createContractMutation(), onSuccess })`. Do not write `queryFn`/`queryKey` by hand.
 - After a mutation, invalidate by operation id (`queryKey: [{ _id }]` from the generated `*QueryKey()`), so every page/filter of that list refreshes.
 - Form schemas start from `@workspace/api-client/zod`; only add UI-only fields (e.g. `confirmPassword`) or `.pick()` subsets. Never redefine backend rules.
 - Shared-state libs are `peerDependencies` (one instance per app). Add new ones the same way and install them in both apps.
@@ -39,7 +39,7 @@ src/
   apps only lay out `FormInput`s and call `onSubmit`. If web and mobile forms differ in more than
   markup, the difference belongs in the hook.
 - Features shipped: `auth` (session, account lifecycle forms), `preferences` (locale, theme),
-  `todos` (reference CRUD: infinite list, optimistic toggle/delete, realtime), `notifications`
+  `partners` (reference: infinite list with search and filters), `documents`, `contracts`, `pricing`, `users`, `notifications`
   (push device registration; unregistered on logout).
 - One feature imports another only through its `index.ts`; `lib/` imports no feature
   (`pnpm lint:deps` enforces both).

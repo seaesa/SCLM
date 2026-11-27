@@ -12,7 +12,7 @@ def generate_operation_id(route: APIRoute) -> str:
     """Use the handler function name as operationId.
 
     The generated TS client derives SDK / React Query names from it
-    (`list_todos` -> `listTodos`, `listTodosOptions`), so handler names must be
+    (`list_partners` -> `listPartners`, `listPartnersOptions`), so handler names must be
     unique across the whole API. `tests/test_openapi.py` enforces this.
     """
     return route.name
@@ -29,7 +29,7 @@ def include_realtime_events(app: FastAPI, events: Sequence[type[Event]]) -> None
     def openapi() -> dict[str, Any]:
         schema = base()
         schemas = schema.setdefault("components", {}).setdefault("schemas", {})
-        if "RealtimeEvents" in schemas or not events:
+        if "RealtimeEvents" in schemas:
             return schema
         _, defs = models_json_schema(
             [(event, "serialization") for event in events],
@@ -44,6 +44,8 @@ def include_realtime_events(app: FastAPI, events: Sequence[type[Event]]) -> None
                 e.event_name: {"$ref": f"#/components/schemas/{e.__name__}"} for e in events
             },
             "required": [e.event_name for e in events],
+            # Closed map: with no events yet the client sees no event names, not any string.
+            "additionalProperties": False,
         }
         # Transport constants as `const` schemas: the client reads the value from the generated
         # Zod literal instead of keeping its own copy.

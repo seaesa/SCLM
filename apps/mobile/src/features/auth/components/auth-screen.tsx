@@ -3,13 +3,11 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native"
 import { useTranslation } from "@workspace/i18n"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PreferencesSection } from "@/features/preferences/components/preferences-section"
 
 import { LoginForm } from "./login-form"
-import { RegisterForm } from "./register-form"
 
-/** Shared shell for login/register: card + language picker. */
-export function AuthScreen({ variant }: { variant: "login" | "register" }) {
+/** Sign-in shell. */
+export function AuthScreen() {
   const { t } = useTranslation()
   return (
     <KeyboardAvoidingView
@@ -23,12 +21,13 @@ export function AuthScreen({ variant }: { variant: "login" | "register" }) {
         <View className="mx-auto w-full max-w-sm gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t(`auth.${variant}.title`)}</CardTitle>
-              <CardDescription>{t(`auth.${variant}.description`)}</CardDescription>
+              <CardTitle>{t("auth.login.title")}</CardTitle>
+              <CardDescription>{t("auth.login.description")}</CardDescription>
             </CardHeader>
-            <CardContent>{variant === "login" ? <LoginForm /> : <RegisterForm />}</CardContent>
+            <CardContent>
+              <LoginForm />
+            </CardContent>
           </Card>
-          <PreferencesSection showTheme={false} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

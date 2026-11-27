@@ -33,7 +33,8 @@
     "packages/i18n/src/locales/vi.ts",
     "**/*.svg",
     "**/.git/**",
-    "apps/api/src/app/modules/*/templates.py"
+    "apps/api/src/app/modules/*/templates.py",
+    "docs/business/**"
   ],
   "ignoreRegExpList": ["\\b[0-9a-f]{12}\\b", "Urls", "Email", "HexValues"],
   "overrides": [

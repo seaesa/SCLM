@@ -5,8 +5,8 @@ import Link from "next/link"
 import { useVerifyEmailForm } from "@workspace/core/auth"
 import { useTranslation } from "@workspace/i18n"
 
-import { FormInput } from "@/components/form/form-input"
-import { FormRootError } from "@/components/form/form-root-error"
+import { FormInput } from "@/components/design-system/form/form-input"
+import { FormRootError } from "@/components/design-system/form/form-root-error"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FieldGroup } from "@/components/ui/field"
@@ -24,7 +24,7 @@ export function VerifyEmailForm({ token }: { token: string }) {
           <CardDescription>{t("auth.verify.successDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Link href="/todos" className={buttonVariants()}>
+          <Link href="/" className={buttonVariants()}>
             {t("auth.verify.continue")}
           </Link>
         </CardContent>

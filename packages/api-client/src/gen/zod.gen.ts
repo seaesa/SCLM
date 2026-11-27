@@ -3,6 +3,48 @@
 import * as z from 'zod';
 
 /**
+ * Adjustment
+ *
+ * What an addendum changes.
+ */
+export const zAdjustment = z.enum([
+    'price',
+    'route',
+    'fuel',
+    'payment',
+    'term',
+    'other',
+    'revoke'
+]);
+
+/**
+ * ApplyingDocument
+ *
+ * The document behind today's prices, fuel base or end date.
+ */
+export const zApplyingDocument = z.object({
+    kind: zAdjustment,
+    instrumentId: z.uuid(),
+    code: z.string().nullable(),
+    effectiveFrom: z.iso.date().nullable()
+});
+
+/**
+ * AssignOwner
+ */
+export const zAssignOwner = z.object({
+    partnerIds: z.array(z.uuid()).min(1).max(1000),
+    ownerId: z.uuid().nullable()
+});
+
+/**
+ * Body_upload_document_file
+ */
+export const zBodyUploadDocumentFile = z.object({
+    file: z.string()
+});
+
+/**
  * ChangePasswordRequest
  */
 export const zChangePasswordRequest = z.object({
@@ -11,10 +53,110 @@ export const zChangePasswordRequest = z.object({
 });
 
 /**
+ * ComparedLineRead
+ *
+ * A line with the price it replaced, for the before/after view of an addendum.
+ */
+export const zComparedLineRead = z.object({
+    id: z.uuid(),
+    tableId: z.uuid(),
+    service: z.string(),
+    origin: z.string().nullable(),
+    destination: z.string().nullable(),
+    vehicle: z.string().nullable(),
+    unit: z.string(),
+    unitPrice: z.string(),
+    currency: z.string(),
+    includesVat: z.boolean().nullable(),
+    page: z.int(),
+    note: z.string().nullable(),
+    createdAt: z.iso.datetime(),
+    previousPrice: z.string().nullable(),
+    change: z.string().nullable()
+});
+
+/**
+ * ConflictKind
+ */
+export const zConflictKind = z.enum([
+    'duplicate_tax_code',
+    'source_mismatch',
+    'missing_from_source'
+]);
+
+/**
+ * ContractCategory
+ *
+ * The three kinds the business manages; each has its own code series.
+ */
+export const zContractCategory = z.enum([
+    'customer',
+    'contractor',
+    'warehouse'
+]);
+
+/**
+ * ContractRef
+ */
+export const zContractRef = z.object({
+    id: z.uuid(),
+    code: z.string().nullable(),
+    effectiveFrom: z.iso.date().nullable(),
+    endOn: z.iso.date().nullable()
+});
+
+/**
+ * ContractSort
+ */
+export const zContractSort = z.enum([
+    'newest',
+    'end_on',
+    'notice_on',
+    'code'
+]);
+
+/**
+ * ContractStatus
+ */
+export const zContractStatus = z.enum([
+    'draft',
+    'undetermined',
+    'not_yet_effective',
+    'active',
+    'auto_renewed',
+    'expired',
+    'replaced',
+    'terminated'
+]);
+
+/**
  * DeleteAccountRequest
  */
 export const zDeleteAccountRequest = z.object({
     password: z.string().min(1)
+});
+
+/**
+ * DocumentFileRead
+ */
+export const zDocumentFileRead = z.object({
+    id: z.uuid(),
+    path: z.string(),
+    size: z.int(),
+    contentType: z.string(),
+    sha256: z.string()
+});
+
+/**
+ * DocumentSide
+ */
+export const zDocumentSide = z.enum(['customer', 'supplier']);
+
+/**
+ * DownloadUrl
+ */
+export const zDownloadUrl = z.object({
+    url: z.string()
 });
 
 /**
@@ -43,12 +185,57 @@ export const zErrorCode = z.enum([
     'not_found',
     'conflict',
     'email_taken',
+    'partner_role_mismatch',
+    'owner_cannot_handle_contracts',
+    'file_too_large',
+    'file_name_taken',
+    'invalid_field_value',
+    'unknown_field',
+    'file_not_in_dossier',
+    'dossier_not_linked',
+    'instrument_exists',
+    'already_withdrawn',
+    'fuel_price_exists',
+    'official_price_locked',
+    'signed_copy_required',
+    'file_type_not_allowed',
+    'own_access_required',
+    'review_state_invalid',
+    'review_comment_required',
+    'document_locked',
+    'contract_locked',
+    'contract_from_archive',
+    'contract_document_required',
+    'file_in_use',
     'validation_error',
     'rate_limited',
     'app_update_required',
     'http_error',
+    'contract_already_resigned',
     'internal_error'
 ]);
+
+/**
+ * EventKind
+ */
+export const zEventKind = z.enum([
+    'created',
+    'added',
+    'edited',
+    'imported',
+    'submitted',
+    'approved',
+    'rejected',
+    'signing',
+    'deleted'
+]);
+
+/**
+ * FactsWrite
+ */
+export const zFactsWrite = z.object({
+    values: z.record(z.string(), z.string().nullable())
+});
 
 /**
  * FieldError
@@ -77,6 +264,113 @@ export const zErrorResponse = z.object({
 });
 
 /**
+ * FieldKey
+ *
+ * Every fact a document can carry; clients label each one, so the list is part of the API.
+ */
+export const zFieldKey = z.enum([
+    'number',
+    'signed_on',
+    'effective_from',
+    'effective_to',
+    'expires_on',
+    'renewal',
+    'renewal_months',
+    'renewal_notice_days',
+    'value_amount',
+    'payment_days',
+    'payment_business_days',
+    'payment_from',
+    'statement_cutoff',
+    'summary',
+    'replaces',
+    'adjustments',
+    'extends_to',
+    'revokes',
+    'terminated_on'
+]);
+
+/**
+ * FactChange
+ */
+export const zFactChange = z.object({
+    key: zFieldKey,
+    before: z.string().nullable(),
+    after: z.string().nullable()
+});
+
+/**
+ * FieldType
+ */
+export const zFieldType = z.enum([
+    'text',
+    'date',
+    'integer',
+    'boolean',
+    'choice',
+    'choices',
+    'amount'
+]);
+
+/**
+ * FieldValueRead
+ */
+export const zFieldValueRead = z.object({
+    id: z.uuid(),
+    key: zFieldKey,
+    value: z.string().nullable(),
+    enteredById: z.uuid(),
+    createdAt: z.iso.datetime()
+});
+
+/**
+ * FuelPriceRead
+ */
+export const zFuelPriceRead = z.object({
+    id: z.uuid(),
+    fuelType: z.string(),
+    effectiveOn: z.iso.date(),
+    price: z.string(),
+    source: z.string().nullable(),
+    createdAt: z.iso.datetime(),
+    isOfficial: z.boolean().readonly()
+});
+
+/**
+ * FuelPriceSyncReport
+ */
+export const zFuelPriceSyncReport = z.object({
+    added: z.int(),
+    updated: z.int(),
+    unchanged: z.int()
+});
+
+/**
+ * FuelPriceWrite
+ */
+export const zFuelPriceWrite = z.object({
+    fuelType: z.string().min(1).max(100),
+    effectiveOn: z.iso.date(),
+    price: z.union([
+        z.number().gt(0),
+        z.string()
+    ]),
+    source: z.string().max(500).nullish()
+});
+
+/**
+ * FuelProposalRead
+ */
+export const zFuelProposalRead = z.object({
+    fuelOn: z.iso.date(),
+    fuelPrice: z.string(),
+    referencePrice: z.string(),
+    change: z.string(),
+    factor: z.string(),
+    effectiveOn: z.iso.date()
+});
+
+/**
  * HealthStatus
  */
 export const zHealthStatus = z.object({
@@ -84,6 +378,43 @@ export const zHealthStatus = z.object({
     database: z.boolean(),
     redis: z.boolean()
 });
+
+/**
+ * InstrumentKind
+ */
+export const zInstrumentKind = z.enum([
+    'contract',
+    'schedule',
+    'addendum',
+    'termination'
+]);
+
+/**
+ * InstrumentCreate
+ */
+export const zInstrumentCreate = z.object({
+    kind: zInstrumentKind,
+    fileId: z.uuid(),
+    needsApproval: z.boolean().optional().default(false)
+});
+
+/**
+ * InstrumentWorkflow
+ */
+export const zInstrumentWorkflow = z.enum(['awaiting_approval', 'awaiting_signature']);
+
+/**
+ * Lifecycle
+ *
+ * The stages people filter by; each groups one or more statuses.
+ */
+export const zLifecycle = z.enum([
+    'draft',
+    'active',
+    'expired',
+    'terminated',
+    'undetermined'
+]);
 
 /**
  * LoginRequest
@@ -94,9 +425,241 @@ export const zLoginRequest = z.object({
 });
 
 /**
+ * MissingFact
+ *
+ * A key fact one document of the contract does not have yet.
+ */
+export const zMissingFact = z.object({
+    code: z.string().nullable(),
+    kind: zInstrumentKind,
+    key: zFieldKey
+});
+
+/**
+ * OwnerSummary
+ */
+export const zOwnerSummary = z.object({
+    id: z.uuid(),
+    name: z.string()
+});
+
+/**
+ * Page[FuelPriceRead]
+ */
+export const zPageFuelPriceRead = z.object({
+    items: z.array(zFuelPriceRead),
+    total: z.int(),
+    page: z.int(),
+    pageSize: z.int()
+});
+
+/**
+ * PartnerConflictRead
+ */
+export const zPartnerConflictRead = z.object({
+    id: z.uuid(),
+    partnerId: z.uuid(),
+    partnerCode: z.string(),
+    partnerName: z.string(),
+    kind: zConflictKind,
+    detail: z.record(z.string(), z.unknown()),
+    createdAt: z.iso.datetime(),
+    resolvedAt: z.iso.datetime().nullable(),
+    resolutionNote: z.string().nullable()
+});
+
+/**
+ * CursorPage[PartnerConflictRead]
+ */
+export const zCursorPagePartnerConflictRead = z.object({
+    items: z.array(zPartnerConflictRead),
+    nextCursor: z.string().nullable()
+});
+
+/**
+ * PartnerRead
+ */
+export const zPartnerRead = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    legalName: z.string().nullable(),
+    taxCode: z.string().nullable(),
+    address: z.string().nullable(),
+    email: z.string().nullable(),
+    phone: z.string().nullable(),
+    isCustomer: z.boolean(),
+    isSupplier: z.boolean(),
+    isActive: z.boolean(),
+    canOrderBeforeContract: z.boolean(),
+    syncedAt: z.iso.datetime(),
+    createdAt: z.iso.datetime(),
+    owner: zOwnerSummary.nullish()
+});
+
+/**
+ * Page[PartnerRead]
+ */
+export const zPagePartnerRead = z.object({
+    items: z.array(zPartnerRead),
+    total: z.int(),
+    page: z.int(),
+    pageSize: z.int()
+});
+
+/**
+ * PartnerRole
+ */
+export const zPartnerRole = z.enum(['customer', 'supplier']);
+
+/**
+ * Body_create_contract
+ */
+export const zBodyCreateContract = z.object({
+    category: zContractCategory,
+    partnerId: z.uuid(),
+    file: z.string(),
+    side: zPartnerRole.nullish(),
+    needsApproval: z.boolean().optional().default(false),
+    replacesId: z.uuid().nullish()
+});
+
+/**
+ * PartnerSummary
+ *
+ * What a list needs to name a partner.
+ */
+export const zPartnerSummary = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    ownerId: z.uuid().nullish()
+});
+
+/**
+ * DocumentSetDetail
+ */
+export const zDocumentSetDetail = z.object({
+    id: z.uuid(),
+    side: zDocumentSide,
+    partner: zPartnerSummary.nullable(),
+    files: z.array(zDocumentFileRead)
+});
+
+/**
+ * PaymentFilter
+ */
+export const zPaymentFilter = z.enum([
+    'up_to_15',
+    'up_to_30',
+    'up_to_45',
+    'over_45',
+    'none'
+]);
+
+/**
+ * PaymentFrom
+ *
+ * What the credit term is counted from.
+ */
+export const zPaymentFrom = z.enum([
+    'invoice',
+    'statement',
+    'delivery',
+    'other'
+]);
+
+/**
  * Permission
  */
-export const zPermission = z.enum(['users:read']);
+export const zPermission = z.enum([
+    'users:read',
+    'users:manage',
+    'partners:read',
+    'partners:sync',
+    'partners:assign',
+    'contracts:read',
+    'contracts:register',
+    'contracts:approve',
+    'contract-files:download',
+    'sell-prices:read',
+    'buy-prices:read',
+    'fuel-prices:manage',
+    'audit:read'
+]);
+
+/**
+ * PriceLineCorrection
+ */
+export const zPriceLineCorrection = z.object({
+    service: z.string().min(1).max(200),
+    origin: z.string().max(200).nullish(),
+    destination: z.string().max(200).nullish(),
+    vehicle: z.string().max(100).nullish(),
+    unit: z.string().min(1).max(50),
+    unitPrice: z.union([
+        z.number().gt(0),
+        z.string()
+    ]),
+    currency: z.string().regex(/^[A-Z]{3}$/).optional().default('VND'),
+    includesVat: z.boolean().nullish(),
+    page: z.int().gte(1),
+    note: z.string().max(2000).nullish(),
+    reason: z.string().min(3).max(1000).nullish()
+});
+
+/**
+ * PriceLineRead
+ */
+export const zPriceLineRead = z.object({
+    id: z.uuid(),
+    tableId: z.uuid(),
+    service: z.string(),
+    origin: z.string().nullable(),
+    destination: z.string().nullable(),
+    vehicle: z.string().nullable(),
+    unit: z.string(),
+    unitPrice: z.string(),
+    currency: z.string(),
+    includesVat: z.boolean().nullable(),
+    page: z.int(),
+    note: z.string().nullable(),
+    createdAt: z.iso.datetime()
+});
+
+/**
+ * AdjustedLine
+ */
+export const zAdjustedLine = z.object({
+    line: zPriceLineRead,
+    proposedPrice: z.string()
+});
+
+/**
+ * PriceLineWrite
+ */
+export const zPriceLineWrite = z.object({
+    service: z.string().min(1).max(200),
+    origin: z.string().max(200).nullish(),
+    destination: z.string().max(200).nullish(),
+    vehicle: z.string().max(100).nullish(),
+    unit: z.string().min(1).max(50),
+    unitPrice: z.union([
+        z.number().gt(0),
+        z.string()
+    ]),
+    currency: z.string().regex(/^[A-Z]{3}$/).optional().default('VND'),
+    includesVat: z.boolean().nullish(),
+    page: z.int().gte(1),
+    note: z.string().max(2000).nullish()
+});
+
+/**
+ * PriceLinesCreate
+ */
+export const zPriceLinesCreate = z.object({
+    lines: z.array(zPriceLineWrite).min(1).max(500)
+});
 
 /**
  * PushDeviceRegister
@@ -114,6 +677,73 @@ export const zRefreshRequest = z.object({
 });
 
 /**
+ * Renewal
+ */
+export const zRenewal = z.enum([
+    'none',
+    'automatic',
+    'conditional'
+]);
+
+export const zFieldChoice = z.union([
+    zRenewal,
+    zPaymentFrom,
+    zAdjustment,
+    z.enum([
+        'month_end',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '21',
+        '22',
+        '23',
+        '24',
+        '25',
+        '26',
+        '27',
+        '28'
+    ])
+]);
+
+/**
+ * FieldSpecRead
+ */
+export const zFieldSpecRead = z.object({
+    key: zFieldKey,
+    type: zFieldType,
+    instrument: zInstrumentKind,
+    isKey: z.boolean(),
+    choices: z.array(zFieldChoice)
+});
+
+/**
+ * RenewalFilter
+ */
+export const zRenewalFilter = z.enum([
+    'automatic',
+    'in_cycle',
+    'conditional',
+    'none'
+]);
+
+/**
  * ResetPasswordRequest
  */
 export const zResetPasswordRequest = z.object({
@@ -122,47 +752,413 @@ export const zResetPasswordRequest = z.object({
 });
 
 /**
+ * ResolveConflictRequest
+ */
+export const zResolveConflictRequest = z.object({
+    note: z.string().min(1).max(2000)
+});
+
+/**
+ * ReviewDecision
+ */
+export const zReviewDecision = z.object({
+    comment: z.string().max(2000).nullish()
+});
+
+/**
+ * ReviewState
+ *
+ * Approval of a document Spider drafts itself (a contract or an addendum). Archive documents
+ * and documents drafted by the counterparty are recorded after signing and have no review.
+ */
+export const zReviewState = z.enum([
+    'draft',
+    'submitted',
+    'approved',
+    'rejected'
+]);
+
+/**
+ * ContractRead
+ */
+export const zContractRead = z.object({
+    id: z.uuid(),
+    code: z.string().nullable(),
+    category: zContractCategory,
+    partnerId: z.uuid(),
+    partner: zPartnerSummary,
+    owner: zOwnerSummary.nullable(),
+    side: zPartnerRole,
+    dossierId: z.uuid(),
+    reviewState: zReviewState.nullable(),
+    replacedById: z.uuid().nullable(),
+    replacedOn: z.iso.date().nullable(),
+    number: z.string().nullable(),
+    signedOn: z.iso.date().nullable(),
+    effectiveFrom: z.iso.date().nullable(),
+    status: zContractStatus,
+    lifecycle: zLifecycle,
+    endOn: z.iso.date().nullable(),
+    renewal: zRenewal.nullable(),
+    renewalNoticeDays: z.int().nullable(),
+    noticeOn: z.iso.date().nullable(),
+    valueAmount: z.string().nullable(),
+    paymentDays: z.int().nullable(),
+    paymentBusinessDays: z.boolean().nullable(),
+    paymentFrom: zPaymentFrom.nullable(),
+    statementCutoff: z.string().nullable(),
+    addendumCount: z.int(),
+    missingCount: z.int(),
+    missingFacts: z.array(zMissingFact),
+    isImported: z.boolean(),
+    createdAt: z.iso.datetime()
+});
+
+/**
+ * Page[ContractRead]
+ */
+export const zPageContractRead = z.object({
+    items: z.array(zContractRead),
+    total: z.int(),
+    page: z.int(),
+    pageSize: z.int()
+});
+
+/**
+ * ReviewSubmit
+ */
+export const zReviewSubmit = z.object({
+    fileId: z.uuid().nullish(),
+    comment: z.string().max(2000).nullish()
+});
+
+/**
  * Role
  */
-export const zRole = z.enum(['member', 'admin']);
+export const zRole = z.enum([
+    'admin',
+    'accountant',
+    'director'
+]);
 
 /**
- * TodoCreate
+ * Rounding
  */
-export const zTodoCreate = z.object({
-    title: z.string().min(1).max(255),
-    description: z.string().max(5000).nullish()
-});
+export const zRounding = z.enum([
+    'none',
+    'down_100',
+    'nearest_100',
+    'down_1000',
+    'nearest_1000'
+]);
 
 /**
- * TodoRead
+ * FuelClauseRead
  */
-export const zTodoRead = z.object({
+export const zFuelClauseRead = z.object({
     id: z.uuid(),
-    title: z.string(),
-    description: z.string().nullable(),
-    completed: z.boolean(),
-    createdAt: z.iso.datetime(),
-    updatedAt: z.iso.datetime()
+    contractId: z.uuid(),
+    instrumentId: z.uuid(),
+    fuelType: z.string(),
+    basePrice: z.string(),
+    baseOn: z.iso.date(),
+    share: z.string(),
+    threshold: z.string(),
+    lagDays: z.int(),
+    rounding: zRounding,
+    isCumulative: z.boolean(),
+    page: z.int(),
+    quote: z.string().nullable(),
+    createdAt: z.iso.datetime()
 });
 
 /**
- * CursorPage[TodoRead]
- */
-export const zCursorPageTodoRead = z.object({
-    items: z.array(zTodoRead),
-    nextCursor: z.string().nullable()
-});
-
-/**
- * TodoUpdate
+ * FuelAdjustment
  *
- * `title` and `completed` cannot be nulled; `description` can (it clears the value).
+ * A proposal only: the new prices bind once both parties sign the addendum.
  */
-export const zTodoUpdate = z.object({
-    title: z.string().min(1).max(255).nullish(),
-    description: z.string().max(5000).nullish(),
-    completed: z.boolean().nullish()
+export const zFuelAdjustment = z.object({
+    clause: zFuelClauseRead.nullable(),
+    proposal: zFuelProposalRead.nullable(),
+    lines: z.array(zAdjustedLine)
+});
+
+/**
+ * FuelClauseWrite
+ */
+export const zFuelClauseWrite = z.object({
+    instrumentId: z.uuid(),
+    fuelType: z.string().min(1).max(100),
+    basePrice: z.union([
+        z.number().gt(0),
+        z.string()
+    ]),
+    baseOn: z.iso.date(),
+    share: z.union([
+        z.number().gt(0).lte(1),
+        z.string()
+    ]),
+    threshold: z.union([
+        z.number().gt(0).lte(1),
+        z.string()
+    ]),
+    lagDays: z.int().gte(0).lte(90),
+    rounding: zRounding,
+    isCumulative: z.boolean(),
+    page: z.int().gte(1),
+    quote: z.string().max(2000).nullish()
+});
+
+/**
+ * SigningState
+ */
+export const zSigningState = z.enum([
+    'unsigned',
+    'spider_signed',
+    'partner_signed',
+    'signed'
+]);
+
+/**
+ * ContractEventRead
+ */
+export const zContractEventRead = z.object({
+    id: z.uuid(),
+    kind: zEventKind,
+    instrumentId: z.uuid().nullable(),
+    instrumentCode: z.string().nullable(),
+    changes: z.array(zFactChange),
+    signingState: zSigningState.nullable(),
+    fileId: z.uuid().nullable(),
+    comment: z.string().nullable(),
+    actorId: z.uuid(),
+    actorName: z.string().nullable(),
+    createdAt: z.iso.datetime()
+});
+
+/**
+ * SigningWrite
+ */
+export const zSigningWrite = z.object({
+    state: zSigningState,
+    fileId: z.uuid().nullish()
+});
+
+/**
+ * Standing
+ *
+ * Where a signed addendum or schedule stands on a given day.
+ */
+export const zStanding = z.enum([
+    'pending',
+    'applying',
+    'in_force',
+    'superseded',
+    'lapsed',
+    'revoked'
+]);
+
+/**
+ * InstrumentListItem
+ *
+ * One addendum, schedule or termination in the list grouped by contract.
+ */
+export const zInstrumentListItem = z.object({
+    id: z.uuid(),
+    kind: zInstrumentKind,
+    code: z.string().nullable(),
+    number: z.string().nullable(),
+    signedOn: z.iso.date().nullable(),
+    effectiveFrom: z.iso.date().nullable(),
+    effectiveTo: z.iso.date().nullable(),
+    adjustments: z.array(zAdjustment),
+    summary: z.string().nullable(),
+    reviewState: zReviewState.nullable(),
+    signingState: zSigningState,
+    standing: zStanding.nullable(),
+    replacedByCode: z.string().nullable(),
+    missingCount: z.int(),
+    fileId: z.uuid(),
+    contractId: z.uuid(),
+    contractCode: z.string().nullable(),
+    contractStatus: zContractStatus,
+    contractAnnexCount: z.int(),
+    partner: zPartnerSummary,
+    owner: zOwnerSummary.nullable()
+});
+
+/**
+ * InstrumentRead
+ */
+export const zInstrumentRead = z.object({
+    id: z.uuid(),
+    kind: zInstrumentKind,
+    code: z.string().nullable(),
+    number: z.string().nullable(),
+    signedOn: z.iso.date().nullable(),
+    effectiveFrom: z.iso.date().nullable(),
+    effectiveTo: z.iso.date().nullable(),
+    adjustments: z.array(zAdjustment),
+    summary: z.string().nullable(),
+    reviewState: zReviewState.nullable(),
+    signingState: zSigningState,
+    proposedByName: z.string().nullable(),
+    approvedByName: z.string().nullable(),
+    isSettled: z.boolean(),
+    standing: zStanding.nullable(),
+    replacedByCode: z.string().nullable(),
+    fileId: z.uuid(),
+    values: z.array(zFieldValueRead),
+    missing: z.array(z.string()),
+    canDelete: z.boolean()
+});
+
+/**
+ * ContractDetail
+ */
+export const zContractDetail = z.object({
+    id: z.uuid(),
+    code: z.string().nullable(),
+    category: zContractCategory,
+    partnerId: z.uuid(),
+    partner: zPartnerSummary,
+    owner: zOwnerSummary.nullable(),
+    side: zPartnerRole,
+    dossierId: z.uuid(),
+    reviewState: zReviewState.nullable(),
+    replacedById: z.uuid().nullable(),
+    replacedOn: z.iso.date().nullable(),
+    number: z.string().nullable(),
+    signedOn: z.iso.date().nullable(),
+    effectiveFrom: z.iso.date().nullable(),
+    status: zContractStatus,
+    lifecycle: zLifecycle,
+    endOn: z.iso.date().nullable(),
+    renewal: zRenewal.nullable(),
+    renewalNoticeDays: z.int().nullable(),
+    noticeOn: z.iso.date().nullable(),
+    valueAmount: z.string().nullable(),
+    paymentDays: z.int().nullable(),
+    paymentBusinessDays: z.boolean().nullable(),
+    paymentFrom: zPaymentFrom.nullable(),
+    statementCutoff: z.string().nullable(),
+    addendumCount: z.int(),
+    missingCount: z.int(),
+    missingFacts: z.array(zMissingFact),
+    isImported: z.boolean(),
+    createdAt: z.iso.datetime(),
+    instruments: z.array(zInstrumentRead),
+    events: z.array(zContractEventRead),
+    canDelete: z.boolean(),
+    applying: z.array(zApplyingDocument),
+    replaces: zContractRef.nullable(),
+    replacedBy: zContractRef.nullable(),
+    overlapping: z.array(zContractRef)
+});
+
+/**
+ * Page[InstrumentListItem]
+ */
+export const zPageInstrumentListItem = z.object({
+    items: z.array(zInstrumentListItem),
+    total: z.int(),
+    page: z.int(),
+    pageSize: z.int()
+});
+
+/**
+ * StatementFilter
+ */
+export const zStatementFilter = z.enum([
+    'month_end',
+    'day_of_month',
+    'none'
+]);
+
+/**
+ * StatusCount
+ */
+export const zStatusCount = z.object({
+    status: zContractStatus,
+    count: z.int()
+});
+
+/**
+ * ContractOverview
+ */
+export const zContractOverview = z.object({
+    byStatus: z.array(zStatusCount),
+    awaitingApproval: z.int(),
+    awaitingSignature: z.int(),
+    expiringSoon: z.int(),
+    noticeSoon: z.int()
+});
+
+/**
+ * Overview
+ */
+export const zOverview = z.object({
+    on: z.iso.date(),
+    contracts: zContractOverview
+});
+
+/**
+ * TableMode
+ */
+export const zTableMode = z.enum(['replace', 'amend']);
+
+/**
+ * PriceTableRead
+ */
+export const zPriceTableRead = z.object({
+    id: z.uuid(),
+    contractId: z.uuid(),
+    instrumentId: z.uuid(),
+    effectiveFrom: z.iso.date(),
+    effectiveTo: z.iso.date().nullable(),
+    mode: zTableMode,
+    page: z.int(),
+    quote: z.string().nullable(),
+    note: z.string().nullable(),
+    createdAt: z.iso.datetime(),
+    lines: z.array(zComparedLineRead)
+});
+
+/**
+ * ContractPricing
+ */
+export const zContractPricing = z.object({
+    tables: z.array(zPriceTableRead),
+    fuelClauses: z.array(zFuelClauseRead)
+});
+
+/**
+ * PriceTableSummary
+ */
+export const zPriceTableSummary = z.object({
+    id: z.uuid(),
+    contractId: z.uuid(),
+    instrumentId: z.uuid(),
+    effectiveFrom: z.iso.date(),
+    effectiveTo: z.iso.date().nullable(),
+    mode: zTableMode,
+    page: z.int(),
+    quote: z.string().nullable(),
+    note: z.string().nullable(),
+    createdAt: z.iso.datetime()
+});
+
+/**
+ * PriceTableWrite
+ */
+export const zPriceTableWrite = z.object({
+    instrumentId: z.uuid(),
+    effectiveFrom: z.iso.date(),
+    effectiveTo: z.iso.date().nullish(),
+    mode: zTableMode,
+    page: z.int().gte(1),
+    quote: z.string().max(2000).nullish(),
+    note: z.string().max(2000).nullish()
 });
 
 /**
@@ -176,12 +1172,32 @@ export const zTokenPair = z.object({
 });
 
 /**
+ * UserAdminUpdate
+ */
+export const zUserAdminUpdate = z.object({
+    fullName: z.string().min(1).max(255).nullish(),
+    roles: z.array(zRole).nullish(),
+    isActive: z.boolean().nullish()
+});
+
+/**
  * UserCreate
  */
 export const zUserCreate = z.object({
     email: z.email(),
     fullName: z.string().min(1).max(255),
     password: z.string().min(8).max(128)
+});
+
+/**
+ * UserInvite
+ *
+ * An account an administrator opens; the person sets their own password from the email.
+ */
+export const zUserInvite = z.object({
+    email: z.email(),
+    fullName: z.string().min(1).max(255),
+    roles: z.array(zRole).min(1)
 });
 
 /**
@@ -193,17 +1209,19 @@ export const zUserRead = z.object({
     fullName: z.string(),
     isActive: z.boolean(),
     emailVerified: z.boolean(),
-    role: zRole,
+    roles: z.array(zRole),
     permissions: z.array(zPermission),
     createdAt: z.iso.datetime()
 });
 
 /**
- * CursorPage[UserRead]
+ * Page[UserRead]
  */
-export const zCursorPageUserRead = z.object({
+export const zPageUserRead = z.object({
     items: z.array(zUserRead),
-    nextCursor: z.string().nullable()
+    total: z.int(),
+    page: z.int(),
+    pageSize: z.int()
 });
 
 /**
@@ -221,26 +1239,16 @@ export const zVerifyEmailRequest = z.object({
 });
 
 /**
- * TodoChanged
- *
- * Sent to the owner (all their devices) after any todo write.
+ * WithdrawRequest
  */
-export const zTodoChanged = z.object({
-    action: z.enum([
-        'created',
-        'updated',
-        'deleted'
-    ]),
-    id: z.uuid(),
-    todo: zTodoRead.nullish().default(null)
+export const zWithdrawRequest = z.object({
+    reason: z.string().min(3).max(1000).nullish()
 });
 
 /**
  * Socket.IO events sent by the server: event name -> payload.
  */
-export const zRealtimeEvents = z.object({
-    'todo.changed': zTodoChanged
-});
+export const zRealtimeEvents = z.record(z.string(), z.never());
 
 /**
  * How clients reach the Socket.IO server.
@@ -248,6 +1256,70 @@ export const zRealtimeEvents = z.object({
 export const zRealtimeTransport = z.object({
     path: z.literal('/ws/socket.io')
 });
+
+export const zFieldChoiceWritable = z.union([
+    zRenewal,
+    zPaymentFrom,
+    zAdjustment,
+    z.enum([
+        'month_end',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '21',
+        '22',
+        '23',
+        '24',
+        '25',
+        '26',
+        '27',
+        '28'
+    ])
+]);
+
+/**
+ * FuelPriceRead
+ */
+export const zFuelPriceReadWritable = z.object({
+    id: z.uuid(),
+    fuelType: z.string(),
+    effectiveOn: z.iso.date(),
+    price: z.string(),
+    source: z.string().nullable(),
+    createdAt: z.iso.datetime()
+});
+
+/**
+ * Page[FuelPriceRead]
+ */
+export const zPageFuelPriceReadWritable = z.object({
+    items: z.array(zFuelPriceReadWritable),
+    total: z.int(),
+    page: z.int(),
+    pageSize: z.int()
+});
+
+/**
+ * Socket.IO events sent by the server: event name -> payload.
+ */
+export const zRealtimeEventsWritable = z.record(z.string(), z.never());
 
 /**
  * Successful Response
@@ -334,14 +1406,28 @@ export const zChangePasswordBody = zChangePasswordRequest;
 export const zChangePasswordResponse = z.void();
 
 export const zListUsersQuery = z.object({
-    limit: z.int().gte(1).lte(100).optional().default(20),
-    cursor: z.string().nullish()
+    page: z.int().gte(1).lte(10000).optional().default(1),
+    pageSize: z.int().gte(1).lte(100).optional().default(20),
+    q: z.string().min(2).max(100).nullish(),
+    role: zRole.nullish(),
+    isActive: z.boolean().nullish()
 });
 
 /**
  * Successful Response
  */
-export const zListUsersResponse = zCursorPageUserRead;
+export const zListUsersResponse = zPageUserRead;
+
+export const zInviteUserBody = zUserInvite;
+
+export const zInviteUserHeaders = z.object({
+    'Accept-Language': z.string().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zInviteUserResponse = zUserRead;
 
 /**
  * Successful Response
@@ -361,6 +1447,30 @@ export const zDeleteMeBody = zDeleteAccountRequest;
  * Successful Response
  */
 export const zDeleteMeResponse = z.void();
+
+export const zAdministerUserBody = zUserAdminUpdate;
+
+export const zAdministerUserPath = z.object({
+    userId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdministerUserResponse = zUserRead;
+
+export const zSendUserPasswordEmailHeaders = z.object({
+    'Accept-Language': z.string().nullish()
+});
+
+export const zSendUserPasswordEmailPath = z.object({
+    userId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSendUserPasswordEmailResponse = z.void();
 
 export const zRegisterPushDeviceBody = zPushDeviceRegister;
 
@@ -382,49 +1492,405 @@ export const zUnregisterPushDevicePath = z.object({
  */
 export const zUnregisterPushDeviceResponse = z.void();
 
-export const zListTodosQuery = z.object({
+export const zListPartnersQuery = z.object({
+    page: z.int().gte(1).lte(10000).optional().default(1),
+    pageSize: z.int().gte(1).lte(100).optional().default(20),
+    q: z.string().min(2).max(100).nullish(),
+    role: zPartnerRole.nullish(),
+    ownerId: z.uuid().nullish(),
+    isUnassigned: z.boolean().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListPartnersResponse = zPagePartnerRead;
+
+/**
+ * Response List Partner Owner Candidates
+ *
+ * Successful Response
+ */
+export const zListPartnerOwnerCandidatesResponse = z.array(zOwnerSummary);
+
+export const zGetPartnerPath = z.object({
+    partnerId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPartnerResponse = zPartnerRead;
+
+export const zAssignPartnerOwnerBody = zAssignOwner;
+
+/**
+ * Successful Response
+ */
+export const zAssignPartnerOwnerResponse = z.void();
+
+export const zListPartnerConflictsQuery = z.object({
     limit: z.int().gte(1).lte(100).optional().default(20),
     cursor: z.string().nullish(),
-    completed: z.boolean().nullish()
+    isOpen: z.boolean().optional().default(true)
 });
 
 /**
  * Successful Response
  */
-export const zListTodosResponse = zCursorPageTodoRead;
+export const zListPartnerConflictsResponse = zCursorPagePartnerConflictRead;
 
-export const zCreateTodoBody = zTodoCreate;
+export const zResolvePartnerConflictBody = zResolveConflictRequest;
 
-/**
- * Successful Response
- */
-export const zCreateTodoResponse = zTodoRead;
-
-export const zDeleteTodoPath = z.object({
-    todoId: z.uuid()
+export const zResolvePartnerConflictPath = z.object({
+    conflictId: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zDeleteTodoResponse = z.void();
+export const zResolvePartnerConflictResponse = z.void();
 
-export const zGetTodoPath = z.object({
-    todoId: z.uuid()
+export const zGetDocumentSetPath = z.object({
+    setId: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zGetTodoResponse = zTodoRead;
+export const zGetDocumentSetResponse = zDocumentSetDetail;
 
-export const zUpdateTodoBody = zTodoUpdate;
-
-export const zUpdateTodoPath = z.object({
-    todoId: z.uuid()
+export const zGetDocumentFileUrlPath = z.object({
+    setId: z.uuid(),
+    fileId: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zUpdateTodoResponse = zTodoRead;
+export const zGetDocumentFileUrlResponse = zDownloadUrl;
+
+export const zUploadDocumentFileBody = zBodyUploadDocumentFile;
+
+export const zUploadDocumentFilePath = z.object({
+    setId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUploadDocumentFileResponse = zDocumentFileRead;
+
+/**
+ * Response List Contract Fields
+ *
+ * Successful Response
+ */
+export const zListContractFieldsResponse = z.array(zFieldSpecRead);
+
+export const zListContractsQuery = z.object({
+    page: z.int().gte(1).lte(10000).optional().default(1),
+    pageSize: z.int().gte(1).lte(100).optional().default(20),
+    q: z.string().min(2).max(100).nullish(),
+    categories: z.array(zContractCategory).nullish(),
+    lifecycle: zLifecycle.nullish(),
+    partnerId: z.uuid().nullish(),
+    dossierId: z.uuid().nullish(),
+    signedFrom: z.iso.date().nullish(),
+    signedTo: z.iso.date().nullish(),
+    endFrom: z.iso.date().nullish(),
+    endTo: z.iso.date().nullish(),
+    noticeFrom: z.iso.date().nullish(),
+    noticeTo: z.iso.date().nullish(),
+    renewal: zRenewalFilter.nullish(),
+    payments: z.array(zPaymentFilter).nullish(),
+    statements: z.array(zStatementFilter).nullish(),
+    isAwaitingApproval: z.boolean().nullish(),
+    isAwaitingSignature: z.boolean().nullish(),
+    isIncomplete: z.boolean().nullish(),
+    ownerId: z.uuid().nullish(),
+    isUnassigned: z.boolean().nullish(),
+    sort: zContractSort.optional().default('newest')
+});
+
+/**
+ * Successful Response
+ */
+export const zListContractsResponse = zPageContractRead;
+
+export const zCreateContractBody = zBodyCreateContract;
+
+/**
+ * Successful Response
+ */
+export const zCreateContractResponse = zContractDetail;
+
+export const zListContractInstrumentsQuery = z.object({
+    page: z.int().gte(1).lte(10000).optional().default(1),
+    pageSize: z.int().gte(1).lte(100).optional().default(20),
+    q: z.string().min(2).max(100).nullish(),
+    contractId: z.uuid().nullish(),
+    kind: zInstrumentKind.nullish(),
+    workflow: zInstrumentWorkflow.nullish(),
+    adjustment: zAdjustment.nullish(),
+    effectiveFrom: z.iso.date().nullish(),
+    effectiveTo: z.iso.date().nullish(),
+    ownerId: z.uuid().nullish(),
+    isUnassigned: z.boolean().nullish(),
+    standing: zStanding.nullish(),
+    isIncomplete: z.boolean().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListContractInstrumentsResponse = zPageInstrumentListItem;
+
+export const zExportContractInstrumentsQuery = z.object({
+    page: z.int().gte(1).lte(10000).optional().default(1),
+    pageSize: z.int().gte(1).lte(100).optional().default(20),
+    q: z.string().min(2).max(100).nullish(),
+    contractId: z.uuid().nullish(),
+    kind: zInstrumentKind.nullish(),
+    workflow: zInstrumentWorkflow.nullish(),
+    adjustment: zAdjustment.nullish(),
+    effectiveFrom: z.iso.date().nullish(),
+    effectiveTo: z.iso.date().nullish(),
+    ownerId: z.uuid().nullish(),
+    isUnassigned: z.boolean().nullish(),
+    standing: zStanding.nullish(),
+    isIncomplete: z.boolean().nullish()
+});
+
+export const zDeleteContractPath = z.object({
+    contractId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteContractResponse = z.void();
+
+export const zGetContractPath = z.object({
+    contractId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetContractResponse = zContractDetail;
+
+export const zAddContractInstrumentBody = zInstrumentCreate;
+
+export const zAddContractInstrumentPath = z.object({
+    contractId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAddContractInstrumentResponse = zContractDetail;
+
+export const zSubmitContractInstrumentBody = zReviewSubmit;
+
+export const zSubmitContractInstrumentPath = z.object({
+    instrumentId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSubmitContractInstrumentResponse = zContractDetail;
+
+export const zApproveContractInstrumentBody = zReviewDecision;
+
+export const zApproveContractInstrumentPath = z.object({
+    instrumentId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zApproveContractInstrumentResponse = zContractDetail;
+
+export const zRejectContractInstrumentBody = zReviewDecision;
+
+export const zRejectContractInstrumentPath = z.object({
+    instrumentId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRejectContractInstrumentResponse = zContractDetail;
+
+export const zSetContractInstrumentSigningBody = zSigningWrite;
+
+export const zSetContractInstrumentSigningPath = z.object({
+    instrumentId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSetContractInstrumentSigningResponse = zContractDetail;
+
+export const zWriteContractFactsBody = zFactsWrite;
+
+export const zWriteContractFactsPath = z.object({
+    instrumentId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zWriteContractFactsResponse = zInstrumentRead;
+
+export const zRemoveContractFilePath = z.object({
+    contractId: z.uuid(),
+    fileId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRemoveContractFileResponse = z.void();
+
+export const zDeleteContractInstrumentPath = z.object({
+    instrumentId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteContractInstrumentResponse = zContractDetail;
+
+export const zGetContractPricingPath = z.object({
+    contractId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetContractPricingResponse = zContractPricing;
+
+export const zGetFuelAdjustmentPath = z.object({
+    contractId: z.uuid()
+});
+
+export const zGetFuelAdjustmentQuery = z.object({
+    on: z.iso.date()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetFuelAdjustmentResponse = zFuelAdjustment;
+
+export const zCreatePriceTableBody = zPriceTableWrite;
+
+/**
+ * Successful Response
+ */
+export const zCreatePriceTableResponse = zPriceTableSummary;
+
+export const zWithdrawPriceTableBody = zWithdrawRequest;
+
+export const zWithdrawPriceTablePath = z.object({
+    tableId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zWithdrawPriceTableResponse = z.void();
+
+export const zCreatePriceLinesBody = zPriceLinesCreate;
+
+export const zCreatePriceLinesPath = z.object({
+    tableId: z.uuid()
+});
+
+/**
+ * Response Create Price Lines
+ *
+ * Successful Response
+ */
+export const zCreatePriceLinesResponse = z.array(zPriceLineRead);
+
+export const zCorrectPriceLineBody = zPriceLineCorrection;
+
+export const zCorrectPriceLinePath = z.object({
+    lineId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCorrectPriceLineResponse = zPriceLineRead;
+
+export const zWithdrawPriceLineBody = zWithdrawRequest;
+
+export const zWithdrawPriceLinePath = z.object({
+    lineId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zWithdrawPriceLineResponse = z.void();
+
+export const zCreateFuelClauseBody = zFuelClauseWrite;
+
+/**
+ * Successful Response
+ */
+export const zCreateFuelClauseResponse = zFuelClauseRead;
+
+export const zWithdrawFuelClauseBody = zWithdrawRequest;
+
+export const zWithdrawFuelClausePath = z.object({
+    clauseId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zWithdrawFuelClauseResponse = z.void();
+
+export const zListFuelPricesQuery = z.object({
+    page: z.int().gte(1).lte(10000).optional().default(1),
+    pageSize: z.int().gte(1).lte(100).optional().default(20),
+    fuelType: z.string().max(100).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListFuelPricesResponse = zPageFuelPriceRead;
+
+export const zCreateFuelPriceBody = zFuelPriceWrite;
+
+/**
+ * Successful Response
+ */
+export const zCreateFuelPriceResponse = zFuelPriceRead;
+
+/**
+ * Successful Response
+ */
+export const zSyncFuelPricesResponse = zFuelPriceSyncReport;
+
+export const zDeleteFuelPricePath = z.object({
+    fuelPriceId: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteFuelPriceResponse = z.void();
+
+/**
+ * Successful Response
+ */
+export const zGetOverviewResponse = zOverview;

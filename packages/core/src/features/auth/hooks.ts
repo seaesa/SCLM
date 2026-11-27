@@ -8,7 +8,6 @@ import {
   getMeOptions,
   getMeQueryKey,
   loginMutation,
-  registerMutation,
   resendVerificationMutation,
   resetPasswordMutation,
   verifyEmailMutation,
@@ -16,26 +15,12 @@ import {
 
 import { acceptLanguage } from "../../lib/locale"
 import { unregisterCurrentPushDevice } from "../notifications"
-import type { ChangePasswordValues, RegisterValues, ResetPasswordValues } from "./schemas"
+import type { ChangePasswordValues, ResetPasswordValues } from "./schemas"
 import { useAuthStore, useIsAuthenticated } from "./store"
 
 export function useLogin() {
   const setTokens = useAuthStore((s) => s.setTokens)
   return useMutation({ ...loginMutation(), onSuccess: setTokens })
-}
-
-export function useRegister() {
-  const setTokens = useAuthStore((s) => s.setTokens)
-  const mutation = useMutation({
-    ...registerMutation({ headers: acceptLanguage() }),
-    onSuccess: setTokens,
-  })
-  return {
-    ...mutation,
-    /** Accepts the form values directly (drops UI-only `confirmPassword`). */
-    submit: ({ confirmPassword: _, ...body }: RegisterValues) =>
-      mutation.mutateAsync({ body, headers: acceptLanguage() }),
-  }
 }
 
 export function useLogout() {

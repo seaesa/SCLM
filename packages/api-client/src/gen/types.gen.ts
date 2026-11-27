@@ -5,6 +5,93 @@ export type ClientOptions = {
 };
 
 /**
+ * AdjustedLine
+ */
+export type AdjustedLine = {
+    line: PriceLineRead;
+    /**
+     * Proposedprice
+     */
+    proposedPrice: string;
+};
+
+/**
+ * Adjustment
+ *
+ * What an addendum changes.
+ */
+export type Adjustment = 'price' | 'route' | 'fuel' | 'payment' | 'term' | 'other' | 'revoke';
+
+/**
+ * ApplyingDocument
+ *
+ * The document behind today's prices, fuel base or end date.
+ */
+export type ApplyingDocument = {
+    kind: Adjustment;
+    /**
+     * Instrumentid
+     */
+    instrumentId: string;
+    /**
+     * Code
+     */
+    code: string | null;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string | null;
+};
+
+/**
+ * AssignOwner
+ */
+export type AssignOwner = {
+    /**
+     * Partnerids
+     */
+    partnerIds: Array<string>;
+    /**
+     * Ownerid
+     */
+    ownerId: string | null;
+};
+
+/**
+ * Body_create_contract
+ */
+export type BodyCreateContract = {
+    category: ContractCategory;
+    /**
+     * Partnerid
+     */
+    partnerId: string;
+    /**
+     * File
+     */
+    file: Blob | File;
+    side?: PartnerRole | null;
+    /**
+     * Needsapproval
+     */
+    needsApproval?: boolean;
+    /**
+     * Replacesid
+     */
+    replacesId?: string | null;
+};
+
+/**
+ * Body_upload_document_file
+ */
+export type BodyUploadDocumentFile = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * ChangePasswordRequest
  */
 export type ChangePasswordRequest = {
@@ -19,27 +106,429 @@ export type ChangePasswordRequest = {
 };
 
 /**
- * CursorPage[TodoRead]
+ * ComparedLineRead
+ *
+ * A line with the price it replaced, for the before/after view of an addendum.
  */
-export type CursorPageTodoRead = {
+export type ComparedLineRead = {
     /**
-     * Items
+     * Id
      */
-    items: Array<TodoRead>;
+    id: string;
     /**
-     * Nextcursor
+     * Tableid
      */
-    nextCursor: string | null;
+    tableId: string;
+    /**
+     * Service
+     */
+    service: string;
+    /**
+     * Origin
+     */
+    origin: string | null;
+    /**
+     * Destination
+     */
+    destination: string | null;
+    /**
+     * Vehicle
+     */
+    vehicle: string | null;
+    /**
+     * Unit
+     */
+    unit: string;
+    /**
+     * Unitprice
+     */
+    unitPrice: string;
+    /**
+     * Currency
+     */
+    currency: string;
+    /**
+     * Includesvat
+     */
+    includesVat: boolean | null;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Note
+     */
+    note: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Previousprice
+     */
+    previousPrice: string | null;
+    /**
+     * Change
+     */
+    change: string | null;
 };
 
 /**
- * CursorPage[UserRead]
+ * ConflictKind
  */
-export type CursorPageUserRead = {
+export type ConflictKind = 'duplicate_tax_code' | 'source_mismatch' | 'missing_from_source';
+
+/**
+ * ContractCategory
+ *
+ * The three kinds the business manages; each has its own code series.
+ */
+export type ContractCategory = 'customer' | 'contractor' | 'warehouse';
+
+/**
+ * ContractDetail
+ */
+export type ContractDetail = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string | null;
+    category: ContractCategory;
+    /**
+     * Partnerid
+     */
+    partnerId: string;
+    partner: PartnerSummary;
+    owner: OwnerSummary | null;
+    side: PartnerRole;
+    /**
+     * Dossierid
+     */
+    dossierId: string;
+    reviewState: ReviewState | null;
+    /**
+     * Replacedbyid
+     */
+    replacedById: string | null;
+    /**
+     * Replacedon
+     */
+    replacedOn: string | null;
+    /**
+     * Number
+     */
+    number: string | null;
+    /**
+     * Signedon
+     */
+    signedOn: string | null;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string | null;
+    status: ContractStatus;
+    lifecycle: Lifecycle;
+    /**
+     * Endon
+     */
+    endOn: string | null;
+    renewal: Renewal | null;
+    /**
+     * Renewalnoticedays
+     */
+    renewalNoticeDays: number | null;
+    /**
+     * Noticeon
+     */
+    noticeOn: string | null;
+    /**
+     * Valueamount
+     */
+    valueAmount: string | null;
+    /**
+     * Paymentdays
+     */
+    paymentDays: number | null;
+    /**
+     * Paymentbusinessdays
+     */
+    paymentBusinessDays: boolean | null;
+    paymentFrom: PaymentFrom | null;
+    /**
+     * Statementcutoff
+     */
+    statementCutoff: string | null;
+    /**
+     * Addendumcount
+     */
+    addendumCount: number;
+    /**
+     * Missingcount
+     */
+    missingCount: number;
+    /**
+     * Missingfacts
+     */
+    missingFacts: Array<MissingFact>;
+    /**
+     * Isimported
+     */
+    isImported: boolean;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Instruments
+     */
+    instruments: Array<InstrumentRead>;
+    /**
+     * Events
+     */
+    events: Array<ContractEventRead>;
+    /**
+     * Candelete
+     */
+    canDelete: boolean;
+    /**
+     * Applying
+     */
+    applying: Array<ApplyingDocument>;
+    replaces: ContractRef | null;
+    replacedBy: ContractRef | null;
+    /**
+     * Overlapping
+     */
+    overlapping: Array<ContractRef>;
+};
+
+/**
+ * ContractEventRead
+ */
+export type ContractEventRead = {
+    /**
+     * Id
+     */
+    id: string;
+    kind: EventKind;
+    /**
+     * Instrumentid
+     */
+    instrumentId: string | null;
+    /**
+     * Instrumentcode
+     */
+    instrumentCode: string | null;
+    /**
+     * Changes
+     */
+    changes: Array<FactChange>;
+    signingState: SigningState | null;
+    /**
+     * Fileid
+     */
+    fileId: string | null;
+    /**
+     * Comment
+     */
+    comment: string | null;
+    /**
+     * Actorid
+     */
+    actorId: string;
+    /**
+     * Actorname
+     */
+    actorName: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * ContractOverview
+ */
+export type ContractOverview = {
+    /**
+     * Bystatus
+     */
+    byStatus: Array<StatusCount>;
+    /**
+     * Awaitingapproval
+     */
+    awaitingApproval: number;
+    /**
+     * Awaitingsignature
+     */
+    awaitingSignature: number;
+    /**
+     * Expiringsoon
+     */
+    expiringSoon: number;
+    /**
+     * Noticesoon
+     */
+    noticeSoon: number;
+};
+
+/**
+ * ContractPricing
+ */
+export type ContractPricing = {
+    /**
+     * Tables
+     */
+    tables: Array<PriceTableRead>;
+    /**
+     * Fuelclauses
+     */
+    fuelClauses: Array<FuelClauseRead>;
+};
+
+/**
+ * ContractRead
+ */
+export type ContractRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string | null;
+    category: ContractCategory;
+    /**
+     * Partnerid
+     */
+    partnerId: string;
+    partner: PartnerSummary;
+    owner: OwnerSummary | null;
+    side: PartnerRole;
+    /**
+     * Dossierid
+     */
+    dossierId: string;
+    reviewState: ReviewState | null;
+    /**
+     * Replacedbyid
+     */
+    replacedById: string | null;
+    /**
+     * Replacedon
+     */
+    replacedOn: string | null;
+    /**
+     * Number
+     */
+    number: string | null;
+    /**
+     * Signedon
+     */
+    signedOn: string | null;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string | null;
+    status: ContractStatus;
+    lifecycle: Lifecycle;
+    /**
+     * Endon
+     */
+    endOn: string | null;
+    renewal: Renewal | null;
+    /**
+     * Renewalnoticedays
+     */
+    renewalNoticeDays: number | null;
+    /**
+     * Noticeon
+     */
+    noticeOn: string | null;
+    /**
+     * Valueamount
+     */
+    valueAmount: string | null;
+    /**
+     * Paymentdays
+     */
+    paymentDays: number | null;
+    /**
+     * Paymentbusinessdays
+     */
+    paymentBusinessDays: boolean | null;
+    paymentFrom: PaymentFrom | null;
+    /**
+     * Statementcutoff
+     */
+    statementCutoff: string | null;
+    /**
+     * Addendumcount
+     */
+    addendumCount: number;
+    /**
+     * Missingcount
+     */
+    missingCount: number;
+    /**
+     * Missingfacts
+     */
+    missingFacts: Array<MissingFact>;
+    /**
+     * Isimported
+     */
+    isImported: boolean;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * ContractRef
+ */
+export type ContractRef = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string | null;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string | null;
+    /**
+     * Endon
+     */
+    endOn: string | null;
+};
+
+/**
+ * ContractSort
+ */
+export type ContractSort = 'newest' | 'end_on' | 'notice_on' | 'code';
+
+/**
+ * ContractStatus
+ */
+export type ContractStatus = 'draft' | 'undetermined' | 'not_yet_effective' | 'active' | 'auto_renewed' | 'expired' | 'replaced' | 'terminated';
+
+/**
+ * CursorPage[PartnerConflictRead]
+ */
+export type CursorPagePartnerConflictRead = {
     /**
      * Items
      */
-    items: Array<UserRead>;
+    items: Array<PartnerConflictRead>;
     /**
      * Nextcursor
      */
@@ -54,6 +543,63 @@ export type DeleteAccountRequest = {
      * Password
      */
     password: string;
+};
+
+/**
+ * DocumentFileRead
+ */
+export type DocumentFileRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Path
+     */
+    path: string;
+    /**
+     * Size
+     */
+    size: number;
+    /**
+     * Contenttype
+     */
+    contentType: string;
+    /**
+     * Sha256
+     */
+    sha256: string;
+};
+
+/**
+ * DocumentSetDetail
+ */
+export type DocumentSetDetail = {
+    /**
+     * Id
+     */
+    id: string;
+    side: DocumentSide;
+    partner: PartnerSummary | null;
+    /**
+     * Files
+     */
+    files: Array<DocumentFileRead>;
+};
+
+/**
+ * DocumentSide
+ */
+export type DocumentSide = 'customer' | 'supplier';
+
+/**
+ * DownloadUrl
+ */
+export type DownloadUrl = {
+    /**
+     * Url
+     */
+    url: string;
 };
 
 /**
@@ -73,7 +619,7 @@ export type EmailRequest = {
  * frontend gets a TS union and `packages/i18n` must translate each one (type-checked).
  * Add a member here before raising a new code.
  */
-export type ErrorCode = 'bad_request' | 'unauthorized' | 'invalid_credentials' | 'invalid_token' | 'account_disabled' | 'email_not_verified' | 'email_already_verified' | 'forbidden' | 'not_found' | 'conflict' | 'email_taken' | 'validation_error' | 'rate_limited' | 'app_update_required' | 'http_error' | 'internal_error';
+export type ErrorCode = 'bad_request' | 'unauthorized' | 'invalid_credentials' | 'invalid_token' | 'account_disabled' | 'email_not_verified' | 'email_already_verified' | 'forbidden' | 'not_found' | 'conflict' | 'email_taken' | 'partner_role_mismatch' | 'owner_cannot_handle_contracts' | 'file_too_large' | 'file_name_taken' | 'invalid_field_value' | 'unknown_field' | 'file_not_in_dossier' | 'dossier_not_linked' | 'instrument_exists' | 'already_withdrawn' | 'fuel_price_exists' | 'official_price_locked' | 'signed_copy_required' | 'file_type_not_allowed' | 'own_access_required' | 'review_state_invalid' | 'review_comment_required' | 'document_locked' | 'contract_locked' | 'contract_from_archive' | 'contract_document_required' | 'file_in_use' | 'validation_error' | 'rate_limited' | 'app_update_required' | 'http_error' | 'contract_already_resigned' | 'internal_error';
 
 /**
  * ErrorResponse
@@ -93,6 +639,40 @@ export type ErrorResponse = {
      */
     requestId?: string | null;
 };
+
+/**
+ * EventKind
+ */
+export type EventKind = 'created' | 'added' | 'edited' | 'imported' | 'submitted' | 'approved' | 'rejected' | 'signing' | 'deleted';
+
+/**
+ * FactChange
+ */
+export type FactChange = {
+    key: FieldKey;
+    /**
+     * Before
+     */
+    before: string | null;
+    /**
+     * After
+     */
+    after: string | null;
+};
+
+/**
+ * FactsWrite
+ */
+export type FactsWrite = {
+    /**
+     * Values
+     */
+    values: {
+        [key: string]: string | null;
+    };
+};
+
+export type FieldChoice = Renewal | PaymentFrom | Adjustment | 'month_end' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23' | '24' | '25' | '26' | '27' | '28';
 
 /**
  * FieldError
@@ -125,6 +705,284 @@ export type FieldError = {
 };
 
 /**
+ * FieldKey
+ *
+ * Every fact a document can carry; clients label each one, so the list is part of the API.
+ */
+export type FieldKey = 'number' | 'signed_on' | 'effective_from' | 'effective_to' | 'expires_on' | 'renewal' | 'renewal_months' | 'renewal_notice_days' | 'value_amount' | 'payment_days' | 'payment_business_days' | 'payment_from' | 'statement_cutoff' | 'summary' | 'replaces' | 'adjustments' | 'extends_to' | 'revokes' | 'terminated_on';
+
+/**
+ * FieldSpecRead
+ */
+export type FieldSpecRead = {
+    key: FieldKey;
+    type: FieldType;
+    instrument: InstrumentKind;
+    /**
+     * Iskey
+     */
+    isKey: boolean;
+    /**
+     * Choices
+     */
+    choices: Array<FieldChoice>;
+};
+
+/**
+ * FieldType
+ */
+export type FieldType = 'text' | 'date' | 'integer' | 'boolean' | 'choice' | 'choices' | 'amount';
+
+/**
+ * FieldValueRead
+ */
+export type FieldValueRead = {
+    /**
+     * Id
+     */
+    id: string;
+    key: FieldKey;
+    /**
+     * Value
+     */
+    value: string | null;
+    /**
+     * Enteredbyid
+     */
+    enteredById: string;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * FuelAdjustment
+ *
+ * A proposal only: the new prices bind once both parties sign the addendum.
+ */
+export type FuelAdjustment = {
+    clause: FuelClauseRead | null;
+    proposal: FuelProposalRead | null;
+    /**
+     * Lines
+     */
+    lines: Array<AdjustedLine>;
+};
+
+/**
+ * FuelClauseRead
+ */
+export type FuelClauseRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Contractid
+     */
+    contractId: string;
+    /**
+     * Instrumentid
+     */
+    instrumentId: string;
+    /**
+     * Fueltype
+     */
+    fuelType: string;
+    /**
+     * Baseprice
+     */
+    basePrice: string;
+    /**
+     * Baseon
+     */
+    baseOn: string;
+    /**
+     * Share
+     */
+    share: string;
+    /**
+     * Threshold
+     */
+    threshold: string;
+    /**
+     * Lagdays
+     */
+    lagDays: number;
+    rounding: Rounding;
+    /**
+     * Iscumulative
+     */
+    isCumulative: boolean;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Quote
+     */
+    quote: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * FuelClauseWrite
+ */
+export type FuelClauseWrite = {
+    /**
+     * Instrumentid
+     */
+    instrumentId: string;
+    /**
+     * Fueltype
+     */
+    fuelType: string;
+    /**
+     * Baseprice
+     */
+    basePrice: number | string;
+    /**
+     * Baseon
+     */
+    baseOn: string;
+    /**
+     * Share
+     */
+    share: number | string;
+    /**
+     * Threshold
+     */
+    threshold: number | string;
+    /**
+     * Lagdays
+     */
+    lagDays: number;
+    rounding: Rounding;
+    /**
+     * Iscumulative
+     */
+    isCumulative: boolean;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Quote
+     */
+    quote?: string | null;
+};
+
+/**
+ * FuelPriceRead
+ */
+export type FuelPriceRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Fueltype
+     */
+    fuelType: string;
+    /**
+     * Effectiveon
+     */
+    effectiveOn: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Source
+     */
+    source: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Isofficial
+     *
+     * Synced from Petrolimex: read-only, it is the source of record.
+     */
+    readonly isOfficial: boolean;
+};
+
+/**
+ * FuelPriceSyncReport
+ */
+export type FuelPriceSyncReport = {
+    /**
+     * Added
+     */
+    added: number;
+    /**
+     * Updated
+     */
+    updated: number;
+    /**
+     * Unchanged
+     */
+    unchanged: number;
+};
+
+/**
+ * FuelPriceWrite
+ */
+export type FuelPriceWrite = {
+    /**
+     * Fueltype
+     */
+    fuelType: string;
+    /**
+     * Effectiveon
+     */
+    effectiveOn: string;
+    /**
+     * Price
+     */
+    price: number | string;
+    /**
+     * Source
+     */
+    source?: string | null;
+};
+
+/**
+ * FuelProposalRead
+ */
+export type FuelProposalRead = {
+    /**
+     * Fuelon
+     */
+    fuelOn: string;
+    /**
+     * Fuelprice
+     */
+    fuelPrice: string;
+    /**
+     * Referenceprice
+     */
+    referencePrice: string;
+    /**
+     * Change
+     */
+    change: string;
+    /**
+     * Factor
+     */
+    factor: string;
+    /**
+     * Effectiveon
+     */
+    effectiveOn: string;
+};
+
+/**
  * HealthStatus
  */
 export type HealthStatus = {
@@ -143,6 +1001,183 @@ export type HealthStatus = {
 };
 
 /**
+ * InstrumentCreate
+ */
+export type InstrumentCreate = {
+    kind: InstrumentKind;
+    /**
+     * Fileid
+     */
+    fileId: string;
+    /**
+     * Needsapproval
+     */
+    needsApproval?: boolean;
+};
+
+/**
+ * InstrumentKind
+ */
+export type InstrumentKind = 'contract' | 'schedule' | 'addendum' | 'termination';
+
+/**
+ * InstrumentListItem
+ *
+ * One addendum, schedule or termination in the list grouped by contract.
+ */
+export type InstrumentListItem = {
+    /**
+     * Id
+     */
+    id: string;
+    kind: InstrumentKind;
+    /**
+     * Code
+     */
+    code: string | null;
+    /**
+     * Number
+     */
+    number: string | null;
+    /**
+     * Signedon
+     */
+    signedOn: string | null;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string | null;
+    /**
+     * Effectiveto
+     */
+    effectiveTo: string | null;
+    /**
+     * Adjustments
+     */
+    adjustments: Array<Adjustment>;
+    /**
+     * Summary
+     */
+    summary: string | null;
+    reviewState: ReviewState | null;
+    signingState: SigningState;
+    standing: Standing | null;
+    /**
+     * Replacedbycode
+     */
+    replacedByCode: string | null;
+    /**
+     * Missingcount
+     */
+    missingCount: number;
+    /**
+     * Fileid
+     */
+    fileId: string;
+    /**
+     * Contractid
+     */
+    contractId: string;
+    /**
+     * Contractcode
+     */
+    contractCode: string | null;
+    contractStatus: ContractStatus;
+    /**
+     * Contractannexcount
+     */
+    contractAnnexCount: number;
+    partner: PartnerSummary;
+    owner: OwnerSummary | null;
+};
+
+/**
+ * InstrumentRead
+ */
+export type InstrumentRead = {
+    /**
+     * Id
+     */
+    id: string;
+    kind: InstrumentKind;
+    /**
+     * Code
+     */
+    code: string | null;
+    /**
+     * Number
+     */
+    number: string | null;
+    /**
+     * Signedon
+     */
+    signedOn: string | null;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string | null;
+    /**
+     * Effectiveto
+     */
+    effectiveTo: string | null;
+    /**
+     * Adjustments
+     */
+    adjustments: Array<Adjustment>;
+    /**
+     * Summary
+     */
+    summary: string | null;
+    reviewState: ReviewState | null;
+    signingState: SigningState;
+    /**
+     * Proposedbyname
+     */
+    proposedByName: string | null;
+    /**
+     * Approvedbyname
+     */
+    approvedByName: string | null;
+    /**
+     * Issettled
+     */
+    isSettled: boolean;
+    standing: Standing | null;
+    /**
+     * Replacedbycode
+     */
+    replacedByCode: string | null;
+    /**
+     * Fileid
+     */
+    fileId: string;
+    /**
+     * Values
+     */
+    values: Array<FieldValueRead>;
+    /**
+     * Missing
+     */
+    missing: Array<string>;
+    /**
+     * Candelete
+     */
+    canDelete: boolean;
+};
+
+/**
+ * InstrumentWorkflow
+ */
+export type InstrumentWorkflow = 'awaiting_approval' | 'awaiting_signature';
+
+/**
+ * Lifecycle
+ *
+ * The stages people filter by; each groups one or more statuses.
+ */
+export type Lifecycle = 'draft' | 'active' | 'expired' | 'terminated' | 'undetermined';
+
+/**
  * LoginRequest
  */
 export type LoginRequest = {
@@ -157,9 +1192,588 @@ export type LoginRequest = {
 };
 
 /**
+ * MissingFact
+ *
+ * A key fact one document of the contract does not have yet.
+ */
+export type MissingFact = {
+    /**
+     * Code
+     */
+    code: string | null;
+    kind: InstrumentKind;
+    key: FieldKey;
+};
+
+/**
+ * Overview
+ */
+export type Overview = {
+    /**
+     * On
+     */
+    on: string;
+    contracts: ContractOverview;
+};
+
+/**
+ * OwnerSummary
+ */
+export type OwnerSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * Page[ContractRead]
+ */
+export type PageContractRead = {
+    /**
+     * Items
+     */
+    items: Array<ContractRead>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Pagesize
+     */
+    pageSize: number;
+};
+
+/**
+ * Page[FuelPriceRead]
+ */
+export type PageFuelPriceRead = {
+    /**
+     * Items
+     */
+    items: Array<FuelPriceRead>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Pagesize
+     */
+    pageSize: number;
+};
+
+/**
+ * Page[InstrumentListItem]
+ */
+export type PageInstrumentListItem = {
+    /**
+     * Items
+     */
+    items: Array<InstrumentListItem>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Pagesize
+     */
+    pageSize: number;
+};
+
+/**
+ * Page[PartnerRead]
+ */
+export type PagePartnerRead = {
+    /**
+     * Items
+     */
+    items: Array<PartnerRead>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Pagesize
+     */
+    pageSize: number;
+};
+
+/**
+ * Page[UserRead]
+ */
+export type PageUserRead = {
+    /**
+     * Items
+     */
+    items: Array<UserRead>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Pagesize
+     */
+    pageSize: number;
+};
+
+/**
+ * PartnerConflictRead
+ */
+export type PartnerConflictRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Partnerid
+     */
+    partnerId: string;
+    /**
+     * Partnercode
+     */
+    partnerCode: string;
+    /**
+     * Partnername
+     */
+    partnerName: string;
+    kind: ConflictKind;
+    /**
+     * Detail
+     */
+    detail: {
+        [key: string]: unknown;
+    };
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Resolvedat
+     */
+    resolvedAt: string | null;
+    /**
+     * Resolutionnote
+     */
+    resolutionNote: string | null;
+};
+
+/**
+ * PartnerRead
+ */
+export type PartnerRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Legalname
+     */
+    legalName: string | null;
+    /**
+     * Taxcode
+     */
+    taxCode: string | null;
+    /**
+     * Address
+     */
+    address: string | null;
+    /**
+     * Email
+     */
+    email: string | null;
+    /**
+     * Phone
+     */
+    phone: string | null;
+    /**
+     * Iscustomer
+     */
+    isCustomer: boolean;
+    /**
+     * Issupplier
+     */
+    isSupplier: boolean;
+    /**
+     * Isactive
+     */
+    isActive: boolean;
+    /**
+     * Canorderbeforecontract
+     */
+    canOrderBeforeContract: boolean;
+    /**
+     * Syncedat
+     */
+    syncedAt: string;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    owner?: OwnerSummary | null;
+};
+
+/**
+ * PartnerRole
+ */
+export type PartnerRole = 'customer' | 'supplier';
+
+/**
+ * PartnerSummary
+ *
+ * What a list needs to name a partner.
+ */
+export type PartnerSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Ownerid
+     */
+    ownerId?: string | null;
+};
+
+/**
+ * PaymentFilter
+ */
+export type PaymentFilter = 'up_to_15' | 'up_to_30' | 'up_to_45' | 'over_45' | 'none';
+
+/**
+ * PaymentFrom
+ *
+ * What the credit term is counted from.
+ */
+export type PaymentFrom = 'invoice' | 'statement' | 'delivery' | 'other';
+
+/**
  * Permission
  */
-export type Permission = 'users:read';
+export type Permission = 'users:read' | 'users:manage' | 'partners:read' | 'partners:sync' | 'partners:assign' | 'contracts:read' | 'contracts:register' | 'contracts:approve' | 'contract-files:download' | 'sell-prices:read' | 'buy-prices:read' | 'fuel-prices:manage' | 'audit:read';
+
+/**
+ * PriceLineCorrection
+ */
+export type PriceLineCorrection = {
+    /**
+     * Service
+     */
+    service: string;
+    /**
+     * Origin
+     */
+    origin?: string | null;
+    /**
+     * Destination
+     */
+    destination?: string | null;
+    /**
+     * Vehicle
+     */
+    vehicle?: string | null;
+    /**
+     * Unit
+     */
+    unit: string;
+    /**
+     * Unitprice
+     */
+    unitPrice: number | string;
+    /**
+     * Currency
+     */
+    currency?: string;
+    /**
+     * Includesvat
+     */
+    includesVat?: boolean | null;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Note
+     */
+    note?: string | null;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+};
+
+/**
+ * PriceLineRead
+ */
+export type PriceLineRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Tableid
+     */
+    tableId: string;
+    /**
+     * Service
+     */
+    service: string;
+    /**
+     * Origin
+     */
+    origin: string | null;
+    /**
+     * Destination
+     */
+    destination: string | null;
+    /**
+     * Vehicle
+     */
+    vehicle: string | null;
+    /**
+     * Unit
+     */
+    unit: string;
+    /**
+     * Unitprice
+     */
+    unitPrice: string;
+    /**
+     * Currency
+     */
+    currency: string;
+    /**
+     * Includesvat
+     */
+    includesVat: boolean | null;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Note
+     */
+    note: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * PriceLineWrite
+ */
+export type PriceLineWrite = {
+    /**
+     * Service
+     */
+    service: string;
+    /**
+     * Origin
+     */
+    origin?: string | null;
+    /**
+     * Destination
+     */
+    destination?: string | null;
+    /**
+     * Vehicle
+     */
+    vehicle?: string | null;
+    /**
+     * Unit
+     */
+    unit: string;
+    /**
+     * Unitprice
+     */
+    unitPrice: number | string;
+    /**
+     * Currency
+     */
+    currency?: string;
+    /**
+     * Includesvat
+     */
+    includesVat?: boolean | null;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Note
+     */
+    note?: string | null;
+};
+
+/**
+ * PriceLinesCreate
+ */
+export type PriceLinesCreate = {
+    /**
+     * Lines
+     */
+    lines: Array<PriceLineWrite>;
+};
+
+/**
+ * PriceTableRead
+ */
+export type PriceTableRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Contractid
+     */
+    contractId: string;
+    /**
+     * Instrumentid
+     */
+    instrumentId: string;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string;
+    /**
+     * Effectiveto
+     */
+    effectiveTo: string | null;
+    mode: TableMode;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Quote
+     */
+    quote: string | null;
+    /**
+     * Note
+     */
+    note: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Lines
+     */
+    lines: Array<ComparedLineRead>;
+};
+
+/**
+ * PriceTableSummary
+ */
+export type PriceTableSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Contractid
+     */
+    contractId: string;
+    /**
+     * Instrumentid
+     */
+    instrumentId: string;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string;
+    /**
+     * Effectiveto
+     */
+    effectiveTo: string | null;
+    mode: TableMode;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Quote
+     */
+    quote: string | null;
+    /**
+     * Note
+     */
+    note: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * PriceTableWrite
+ */
+export type PriceTableWrite = {
+    /**
+     * Instrumentid
+     */
+    instrumentId: string;
+    /**
+     * Effectivefrom
+     */
+    effectiveFrom: string;
+    /**
+     * Effectiveto
+     */
+    effectiveTo?: string | null;
+    mode: TableMode;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Quote
+     */
+    quote?: string | null;
+    /**
+     * Note
+     */
+    note?: string | null;
+};
 
 /**
  * PushDeviceRegister
@@ -186,6 +1800,16 @@ export type RefreshRequest = {
 };
 
 /**
+ * Renewal
+ */
+export type Renewal = 'none' | 'automatic' | 'conditional';
+
+/**
+ * RenewalFilter
+ */
+export type RenewalFilter = 'automatic' | 'in_cycle' | 'conditional' | 'none';
+
+/**
  * ResetPasswordRequest
  */
 export type ResetPasswordRequest = {
@@ -200,73 +1824,100 @@ export type ResetPasswordRequest = {
 };
 
 /**
+ * ResolveConflictRequest
+ */
+export type ResolveConflictRequest = {
+    /**
+     * Note
+     */
+    note: string;
+};
+
+/**
+ * ReviewDecision
+ */
+export type ReviewDecision = {
+    /**
+     * Comment
+     */
+    comment?: string | null;
+};
+
+/**
+ * ReviewState
+ *
+ * Approval of a document Spider drafts itself (a contract or an addendum). Archive documents
+ * and documents drafted by the counterparty are recorded after signing and have no review.
+ */
+export type ReviewState = 'draft' | 'submitted' | 'approved' | 'rejected';
+
+/**
+ * ReviewSubmit
+ */
+export type ReviewSubmit = {
+    /**
+     * Fileid
+     */
+    fileId?: string | null;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+};
+
+/**
  * Role
  */
-export type Role = 'member' | 'admin';
+export type Role = 'admin' | 'accountant' | 'director';
 
 /**
- * TodoCreate
+ * Rounding
  */
-export type TodoCreate = {
+export type Rounding = 'none' | 'down_100' | 'nearest_100' | 'down_1000' | 'nearest_1000';
+
+/**
+ * SigningState
+ */
+export type SigningState = 'unsigned' | 'spider_signed' | 'partner_signed' | 'signed';
+
+/**
+ * SigningWrite
+ */
+export type SigningWrite = {
+    state: SigningState;
     /**
-     * Title
+     * Fileid
      */
-    title: string;
-    /**
-     * Description
-     */
-    description?: string | null;
+    fileId?: string | null;
 };
 
 /**
- * TodoRead
- */
-export type TodoRead = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Title
-     */
-    title: string;
-    /**
-     * Description
-     */
-    description: string | null;
-    /**
-     * Completed
-     */
-    completed: boolean;
-    /**
-     * Createdat
-     */
-    createdAt: string;
-    /**
-     * Updatedat
-     */
-    updatedAt: string;
-};
-
-/**
- * TodoUpdate
+ * Standing
  *
- * `title` and `completed` cannot be nulled; `description` can (it clears the value).
+ * Where a signed addendum or schedule stands on a given day.
  */
-export type TodoUpdate = {
+export type Standing = 'pending' | 'applying' | 'in_force' | 'superseded' | 'lapsed' | 'revoked';
+
+/**
+ * StatementFilter
+ */
+export type StatementFilter = 'month_end' | 'day_of_month' | 'none';
+
+/**
+ * StatusCount
+ */
+export type StatusCount = {
+    status: ContractStatus;
     /**
-     * Title
+     * Count
      */
-    title?: string | null;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Completed
-     */
-    completed?: boolean | null;
+    count: number;
 };
+
+/**
+ * TableMode
+ */
+export type TableMode = 'replace' | 'amend';
 
 /**
  * TokenPair
@@ -291,6 +1942,24 @@ export type TokenPair = {
 };
 
 /**
+ * UserAdminUpdate
+ */
+export type UserAdminUpdate = {
+    /**
+     * Fullname
+     */
+    fullName?: string | null;
+    /**
+     * Roles
+     */
+    roles?: Array<Role> | null;
+    /**
+     * Isactive
+     */
+    isActive?: boolean | null;
+};
+
+/**
  * UserCreate
  */
 export type UserCreate = {
@@ -306,6 +1975,26 @@ export type UserCreate = {
      * Password
      */
     password: string;
+};
+
+/**
+ * UserInvite
+ *
+ * An account an administrator opens; the person sets their own password from the email.
+ */
+export type UserInvite = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Fullname
+     */
+    fullName: string;
+    /**
+     * Roles
+     */
+    roles: Array<Role>;
 };
 
 /**
@@ -332,7 +2021,10 @@ export type UserRead = {
      * Emailverified
      */
     emailVerified: boolean;
-    role: Role;
+    /**
+     * Roles
+     */
+    roles: Array<Role>;
     /**
      * Permissions
      */
@@ -364,27 +2056,20 @@ export type VerifyEmailRequest = {
 };
 
 /**
- * TodoChanged
- *
- * Sent to the owner (all their devices) after any todo write.
+ * WithdrawRequest
  */
-export type TodoChanged = {
+export type WithdrawRequest = {
     /**
-     * Action
+     * Reason
      */
-    action: 'created' | 'updated' | 'deleted';
-    /**
-     * Id
-     */
-    id: string;
-    todo?: TodoRead | null;
+    reason?: string | null;
 };
 
 /**
  * Socket.IO events sent by the server: event name -> payload.
  */
 export type RealtimeEvents = {
-    'todo.changed': TodoChanged;
+    [key: string]: never;
 };
 
 /**
@@ -392,6 +2077,67 @@ export type RealtimeEvents = {
  */
 export type RealtimeTransport = {
     path: '/ws/socket.io';
+};
+
+export type FieldChoiceWritable = Renewal | PaymentFrom | Adjustment | 'month_end' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23' | '24' | '25' | '26' | '27' | '28';
+
+/**
+ * FuelPriceRead
+ */
+export type FuelPriceReadWritable = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Fueltype
+     */
+    fuelType: string;
+    /**
+     * Effectiveon
+     */
+    effectiveOn: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Source
+     */
+    source: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+};
+
+/**
+ * Page[FuelPriceRead]
+ */
+export type PageFuelPriceReadWritable = {
+    /**
+     * Items
+     */
+    items: Array<FuelPriceReadWritable>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Pagesize
+     */
+    pageSize: number;
+};
+
+/**
+ * Socket.IO events sent by the server: event name -> payload.
+ */
+export type RealtimeEventsWritable = {
+    [key: string]: never;
 };
 
 export type HealthCheckData = {
@@ -912,13 +2658,25 @@ export type ListUsersData = {
     path?: never;
     query?: {
         /**
-         * Limit
+         * Page
          */
-        limit?: number;
+        page?: number;
         /**
-         * Cursor
+         * Pagesize
          */
-        cursor?: string | null;
+        pageSize?: number;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Role
+         */
+        role?: Role | null;
+        /**
+         * Isactive
+         */
+        isActive?: boolean | null;
     };
     url: '/api/v1/users';
 };
@@ -960,10 +2718,65 @@ export type ListUsersResponses = {
     /**
      * Successful Response
      */
-    200: CursorPageUserRead;
+    200: PageUserRead;
 };
 
 export type ListUsersResponse = ListUsersResponses[keyof ListUsersResponses];
+
+export type InviteUserData = {
+    body: UserInvite;
+    headers?: {
+        /**
+         * Accept-Language
+         */
+        'Accept-Language'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/users';
+};
+
+export type InviteUserErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type InviteUserError = InviteUserErrors[keyof InviteUserErrors];
+
+export type InviteUserResponses = {
+    /**
+     * Successful Response
+     */
+    201: UserRead;
+};
+
+export type InviteUserResponse = InviteUserResponses[keyof InviteUserResponses];
 
 export type GetMeData = {
     body?: never;
@@ -1111,6 +2924,120 @@ export type DeleteMeResponses = {
 };
 
 export type DeleteMeResponse = DeleteMeResponses[keyof DeleteMeResponses];
+
+export type AdministerUserData = {
+    body: UserAdminUpdate;
+    path: {
+        /**
+         * Userid
+         */
+        userId: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{userId}';
+};
+
+export type AdministerUserErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type AdministerUserError = AdministerUserErrors[keyof AdministerUserErrors];
+
+export type AdministerUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserRead;
+};
+
+export type AdministerUserResponse = AdministerUserResponses[keyof AdministerUserResponses];
+
+export type SendUserPasswordEmailData = {
+    body?: never;
+    headers?: {
+        /**
+         * Accept-Language
+         */
+        'Accept-Language'?: string | null;
+    };
+    path: {
+        /**
+         * Userid
+         */
+        userId: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{userId}/password-email';
+};
+
+export type SendUserPasswordEmailErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type SendUserPasswordEmailError = SendUserPasswordEmailErrors[keyof SendUserPasswordEmailErrors];
+
+export type SendUserPasswordEmailResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type SendUserPasswordEmailResponse = SendUserPasswordEmailResponses[keyof SendUserPasswordEmailResponses];
 
 export type RegisterPushDeviceData = {
     body: PushDeviceRegister;
@@ -1268,7 +3195,235 @@ export type SendTestPushResponses = {
     202: unknown;
 };
 
-export type ListTodosData = {
+export type ListPartnersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Pagesize
+         */
+        pageSize?: number;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Role
+         */
+        role?: PartnerRole | null;
+        /**
+         * Ownerid
+         */
+        ownerId?: string | null;
+        /**
+         * Isunassigned
+         */
+        isUnassigned?: boolean | null;
+    };
+    url: '/api/v1/partners';
+};
+
+export type ListPartnersErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ListPartnersError = ListPartnersErrors[keyof ListPartnersErrors];
+
+export type ListPartnersResponses = {
+    /**
+     * Successful Response
+     */
+    200: PagePartnerRead;
+};
+
+export type ListPartnersResponse = ListPartnersResponses[keyof ListPartnersResponses];
+
+export type ListPartnerOwnerCandidatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/partners/owner-candidates';
+};
+
+export type ListPartnerOwnerCandidatesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ListPartnerOwnerCandidatesError = ListPartnerOwnerCandidatesErrors[keyof ListPartnerOwnerCandidatesErrors];
+
+export type ListPartnerOwnerCandidatesResponses = {
+    /**
+     * Response List Partner Owner Candidates
+     *
+     * Successful Response
+     */
+    200: Array<OwnerSummary>;
+};
+
+export type ListPartnerOwnerCandidatesResponse = ListPartnerOwnerCandidatesResponses[keyof ListPartnerOwnerCandidatesResponses];
+
+export type GetPartnerData = {
+    body?: never;
+    path: {
+        /**
+         * Partnerid
+         */
+        partnerId: string;
+    };
+    query?: never;
+    url: '/api/v1/partners/{partnerId}';
+};
+
+export type GetPartnerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type GetPartnerError = GetPartnerErrors[keyof GetPartnerErrors];
+
+export type GetPartnerResponses = {
+    /**
+     * Successful Response
+     */
+    200: PartnerRead;
+};
+
+export type GetPartnerResponse = GetPartnerResponses[keyof GetPartnerResponses];
+
+export type AssignPartnerOwnerData = {
+    body: AssignOwner;
+    path?: never;
+    query?: never;
+    url: '/api/v1/partners/owner';
+};
+
+export type AssignPartnerOwnerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type AssignPartnerOwnerError = AssignPartnerOwnerErrors[keyof AssignPartnerOwnerErrors];
+
+export type AssignPartnerOwnerResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type AssignPartnerOwnerResponse = AssignPartnerOwnerResponses[keyof AssignPartnerOwnerResponses];
+
+export type ListPartnerConflictsData = {
     body?: never;
     path?: never;
     query?: {
@@ -1281,14 +3436,14 @@ export type ListTodosData = {
          */
         cursor?: string | null;
         /**
-         * Completed
+         * Isopen
          */
-        completed?: boolean | null;
+        isOpen?: boolean;
     };
-    url: '/api/v1/todos';
+    url: '/api/v1/partner-conflicts';
 };
 
-export type ListTodosErrors = {
+export type ListPartnerConflictsErrors = {
     /**
      * Bad Request
      */
@@ -1319,79 +3474,30 @@ export type ListTodosErrors = {
     429: ErrorResponse;
 };
 
-export type ListTodosError = ListTodosErrors[keyof ListTodosErrors];
+export type ListPartnerConflictsError = ListPartnerConflictsErrors[keyof ListPartnerConflictsErrors];
 
-export type ListTodosResponses = {
+export type ListPartnerConflictsResponses = {
     /**
      * Successful Response
      */
-    200: CursorPageTodoRead;
+    200: CursorPagePartnerConflictRead;
 };
 
-export type ListTodosResponse = ListTodosResponses[keyof ListTodosResponses];
+export type ListPartnerConflictsResponse = ListPartnerConflictsResponses[keyof ListPartnerConflictsResponses];
 
-export type CreateTodoData = {
-    body: TodoCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/todos';
-};
-
-export type CreateTodoErrors = {
-    /**
-     * Bad Request
-     */
-    400: ErrorResponse;
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Forbidden
-     */
-    403: ErrorResponse;
-    /**
-     * Not Found
-     */
-    404: ErrorResponse;
-    /**
-     * Conflict
-     */
-    409: ErrorResponse;
-    /**
-     * Unprocessable Content
-     */
-    422: ErrorResponse;
-    /**
-     * Too Many Requests
-     */
-    429: ErrorResponse;
-};
-
-export type CreateTodoError = CreateTodoErrors[keyof CreateTodoErrors];
-
-export type CreateTodoResponses = {
-    /**
-     * Successful Response
-     */
-    201: TodoRead;
-};
-
-export type CreateTodoResponse = CreateTodoResponses[keyof CreateTodoResponses];
-
-export type DeleteTodoData = {
-    body?: never;
+export type ResolvePartnerConflictData = {
+    body: ResolveConflictRequest;
     path: {
         /**
-         * Todoid
+         * Conflictid
          */
-        todoId: string;
+        conflictId: string;
     };
     query?: never;
-    url: '/api/v1/todos/{todoId}';
+    url: '/api/v1/partner-conflicts/{conflictId}/resolve';
 };
 
-export type DeleteTodoErrors = {
+export type ResolvePartnerConflictErrors = {
     /**
      * Bad Request
      */
@@ -1422,30 +3528,30 @@ export type DeleteTodoErrors = {
     429: ErrorResponse;
 };
 
-export type DeleteTodoError = DeleteTodoErrors[keyof DeleteTodoErrors];
+export type ResolvePartnerConflictError = ResolvePartnerConflictErrors[keyof ResolvePartnerConflictErrors];
 
-export type DeleteTodoResponses = {
+export type ResolvePartnerConflictResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeleteTodoResponse = DeleteTodoResponses[keyof DeleteTodoResponses];
+export type ResolvePartnerConflictResponse = ResolvePartnerConflictResponses[keyof ResolvePartnerConflictResponses];
 
-export type GetTodoData = {
+export type GetDocumentSetData = {
     body?: never;
     path: {
         /**
-         * Todoid
+         * Setid
          */
-        todoId: string;
+        setId: string;
     };
     query?: never;
-    url: '/api/v1/todos/{todoId}';
+    url: '/api/v1/document-sets/{setId}';
 };
 
-export type GetTodoErrors = {
+export type GetDocumentSetErrors = {
     /**
      * Bad Request
      */
@@ -1476,30 +3582,34 @@ export type GetTodoErrors = {
     429: ErrorResponse;
 };
 
-export type GetTodoError = GetTodoErrors[keyof GetTodoErrors];
+export type GetDocumentSetError = GetDocumentSetErrors[keyof GetDocumentSetErrors];
 
-export type GetTodoResponses = {
+export type GetDocumentSetResponses = {
     /**
      * Successful Response
      */
-    200: TodoRead;
+    200: DocumentSetDetail;
 };
 
-export type GetTodoResponse = GetTodoResponses[keyof GetTodoResponses];
+export type GetDocumentSetResponse = GetDocumentSetResponses[keyof GetDocumentSetResponses];
 
-export type UpdateTodoData = {
-    body: TodoUpdate;
+export type GetDocumentFileUrlData = {
+    body?: never;
     path: {
         /**
-         * Todoid
+         * Setid
          */
-        todoId: string;
+        setId: string;
+        /**
+         * Fileid
+         */
+        fileId: string;
     };
     query?: never;
-    url: '/api/v1/todos/{todoId}';
+    url: '/api/v1/document-sets/{setId}/files/{fileId}/download-url';
 };
 
-export type UpdateTodoErrors = {
+export type GetDocumentFileUrlErrors = {
     /**
      * Bad Request
      */
@@ -1530,13 +3640,1794 @@ export type UpdateTodoErrors = {
     429: ErrorResponse;
 };
 
-export type UpdateTodoError = UpdateTodoErrors[keyof UpdateTodoErrors];
+export type GetDocumentFileUrlError = GetDocumentFileUrlErrors[keyof GetDocumentFileUrlErrors];
 
-export type UpdateTodoResponses = {
+export type GetDocumentFileUrlResponses = {
     /**
      * Successful Response
      */
-    200: TodoRead;
+    200: DownloadUrl;
 };
 
-export type UpdateTodoResponse = UpdateTodoResponses[keyof UpdateTodoResponses];
+export type GetDocumentFileUrlResponse = GetDocumentFileUrlResponses[keyof GetDocumentFileUrlResponses];
+
+export type UploadDocumentFileData = {
+    body: BodyUploadDocumentFile;
+    path: {
+        /**
+         * Setid
+         */
+        setId: string;
+    };
+    query?: never;
+    url: '/api/v1/document-sets/{setId}/files';
+};
+
+export type UploadDocumentFileErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type UploadDocumentFileError = UploadDocumentFileErrors[keyof UploadDocumentFileErrors];
+
+export type UploadDocumentFileResponses = {
+    /**
+     * Successful Response
+     */
+    201: DocumentFileRead;
+};
+
+export type UploadDocumentFileResponse = UploadDocumentFileResponses[keyof UploadDocumentFileResponses];
+
+export type ListContractFieldsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/contract-fields';
+};
+
+export type ListContractFieldsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ListContractFieldsError = ListContractFieldsErrors[keyof ListContractFieldsErrors];
+
+export type ListContractFieldsResponses = {
+    /**
+     * Response List Contract Fields
+     *
+     * Successful Response
+     */
+    200: Array<FieldSpecRead>;
+};
+
+export type ListContractFieldsResponse = ListContractFieldsResponses[keyof ListContractFieldsResponses];
+
+export type ListContractsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Pagesize
+         */
+        pageSize?: number;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Categories
+         */
+        categories?: Array<ContractCategory> | null;
+        /**
+         * Lifecycle
+         */
+        lifecycle?: Lifecycle | null;
+        /**
+         * Partnerid
+         */
+        partnerId?: string | null;
+        /**
+         * Dossierid
+         */
+        dossierId?: string | null;
+        /**
+         * Signedfrom
+         */
+        signedFrom?: string | null;
+        /**
+         * Signedto
+         */
+        signedTo?: string | null;
+        /**
+         * Endfrom
+         */
+        endFrom?: string | null;
+        /**
+         * Endto
+         */
+        endTo?: string | null;
+        /**
+         * Noticefrom
+         */
+        noticeFrom?: string | null;
+        /**
+         * Noticeto
+         */
+        noticeTo?: string | null;
+        /**
+         * Renewal
+         */
+        renewal?: RenewalFilter | null;
+        /**
+         * Payments
+         */
+        payments?: Array<PaymentFilter> | null;
+        /**
+         * Statements
+         */
+        statements?: Array<StatementFilter> | null;
+        /**
+         * Isawaitingapproval
+         */
+        isAwaitingApproval?: boolean | null;
+        /**
+         * Isawaitingsignature
+         */
+        isAwaitingSignature?: boolean | null;
+        /**
+         * Isincomplete
+         */
+        isIncomplete?: boolean | null;
+        /**
+         * Ownerid
+         */
+        ownerId?: string | null;
+        /**
+         * Isunassigned
+         */
+        isUnassigned?: boolean | null;
+        sort?: ContractSort;
+    };
+    url: '/api/v1/contracts';
+};
+
+export type ListContractsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ListContractsError = ListContractsErrors[keyof ListContractsErrors];
+
+export type ListContractsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PageContractRead;
+};
+
+export type ListContractsResponse = ListContractsResponses[keyof ListContractsResponses];
+
+export type CreateContractData = {
+    body: BodyCreateContract;
+    path?: never;
+    query?: never;
+    url: '/api/v1/contracts';
+};
+
+export type CreateContractErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type CreateContractError = CreateContractErrors[keyof CreateContractErrors];
+
+export type CreateContractResponses = {
+    /**
+     * Successful Response
+     */
+    201: ContractDetail;
+};
+
+export type CreateContractResponse = CreateContractResponses[keyof CreateContractResponses];
+
+export type ListContractInstrumentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Pagesize
+         */
+        pageSize?: number;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Contractid
+         */
+        contractId?: string | null;
+        /**
+         * Kind
+         */
+        kind?: InstrumentKind | null;
+        /**
+         * Workflow
+         */
+        workflow?: InstrumentWorkflow | null;
+        /**
+         * Adjustment
+         */
+        adjustment?: Adjustment | null;
+        /**
+         * Effectivefrom
+         */
+        effectiveFrom?: string | null;
+        /**
+         * Effectiveto
+         */
+        effectiveTo?: string | null;
+        /**
+         * Ownerid
+         */
+        ownerId?: string | null;
+        /**
+         * Isunassigned
+         */
+        isUnassigned?: boolean | null;
+        /**
+         * Standing
+         */
+        standing?: Standing | null;
+        /**
+         * Isincomplete
+         */
+        isIncomplete?: boolean | null;
+    };
+    url: '/api/v1/contract-instruments';
+};
+
+export type ListContractInstrumentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ListContractInstrumentsError = ListContractInstrumentsErrors[keyof ListContractInstrumentsErrors];
+
+export type ListContractInstrumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PageInstrumentListItem;
+};
+
+export type ListContractInstrumentsResponse = ListContractInstrumentsResponses[keyof ListContractInstrumentsResponses];
+
+export type ExportContractInstrumentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Pagesize
+         */
+        pageSize?: number;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Contractid
+         */
+        contractId?: string | null;
+        /**
+         * Kind
+         */
+        kind?: InstrumentKind | null;
+        /**
+         * Workflow
+         */
+        workflow?: InstrumentWorkflow | null;
+        /**
+         * Adjustment
+         */
+        adjustment?: Adjustment | null;
+        /**
+         * Effectivefrom
+         */
+        effectiveFrom?: string | null;
+        /**
+         * Effectiveto
+         */
+        effectiveTo?: string | null;
+        /**
+         * Ownerid
+         */
+        ownerId?: string | null;
+        /**
+         * Isunassigned
+         */
+        isUnassigned?: boolean | null;
+        /**
+         * Standing
+         */
+        standing?: Standing | null;
+        /**
+         * Isincomplete
+         */
+        isIncomplete?: boolean | null;
+    };
+    url: '/api/v1/contract-instruments/export';
+};
+
+export type ExportContractInstrumentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ExportContractInstrumentsError = ExportContractInstrumentsErrors[keyof ExportContractInstrumentsErrors];
+
+export type ExportContractInstrumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type DeleteContractData = {
+    body?: never;
+    path: {
+        /**
+         * Contractid
+         */
+        contractId: string;
+    };
+    query?: never;
+    url: '/api/v1/contracts/{contractId}';
+};
+
+export type DeleteContractErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type DeleteContractError = DeleteContractErrors[keyof DeleteContractErrors];
+
+export type DeleteContractResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteContractResponse = DeleteContractResponses[keyof DeleteContractResponses];
+
+export type GetContractData = {
+    body?: never;
+    path: {
+        /**
+         * Contractid
+         */
+        contractId: string;
+    };
+    query?: never;
+    url: '/api/v1/contracts/{contractId}';
+};
+
+export type GetContractErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type GetContractError = GetContractErrors[keyof GetContractErrors];
+
+export type GetContractResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractDetail;
+};
+
+export type GetContractResponse = GetContractResponses[keyof GetContractResponses];
+
+export type AddContractInstrumentData = {
+    body: InstrumentCreate;
+    path: {
+        /**
+         * Contractid
+         */
+        contractId: string;
+    };
+    query?: never;
+    url: '/api/v1/contracts/{contractId}/instruments';
+};
+
+export type AddContractInstrumentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type AddContractInstrumentError = AddContractInstrumentErrors[keyof AddContractInstrumentErrors];
+
+export type AddContractInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    201: ContractDetail;
+};
+
+export type AddContractInstrumentResponse = AddContractInstrumentResponses[keyof AddContractInstrumentResponses];
+
+export type SubmitContractInstrumentData = {
+    body: ReviewSubmit;
+    path: {
+        /**
+         * Instrumentid
+         */
+        instrumentId: string;
+    };
+    query?: never;
+    url: '/api/v1/contract-instruments/{instrumentId}/submit';
+};
+
+export type SubmitContractInstrumentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type SubmitContractInstrumentError = SubmitContractInstrumentErrors[keyof SubmitContractInstrumentErrors];
+
+export type SubmitContractInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractDetail;
+};
+
+export type SubmitContractInstrumentResponse = SubmitContractInstrumentResponses[keyof SubmitContractInstrumentResponses];
+
+export type ApproveContractInstrumentData = {
+    body: ReviewDecision;
+    path: {
+        /**
+         * Instrumentid
+         */
+        instrumentId: string;
+    };
+    query?: never;
+    url: '/api/v1/contract-instruments/{instrumentId}/approve';
+};
+
+export type ApproveContractInstrumentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ApproveContractInstrumentError = ApproveContractInstrumentErrors[keyof ApproveContractInstrumentErrors];
+
+export type ApproveContractInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractDetail;
+};
+
+export type ApproveContractInstrumentResponse = ApproveContractInstrumentResponses[keyof ApproveContractInstrumentResponses];
+
+export type RejectContractInstrumentData = {
+    body: ReviewDecision;
+    path: {
+        /**
+         * Instrumentid
+         */
+        instrumentId: string;
+    };
+    query?: never;
+    url: '/api/v1/contract-instruments/{instrumentId}/reject';
+};
+
+export type RejectContractInstrumentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type RejectContractInstrumentError = RejectContractInstrumentErrors[keyof RejectContractInstrumentErrors];
+
+export type RejectContractInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractDetail;
+};
+
+export type RejectContractInstrumentResponse = RejectContractInstrumentResponses[keyof RejectContractInstrumentResponses];
+
+export type SetContractInstrumentSigningData = {
+    body: SigningWrite;
+    path: {
+        /**
+         * Instrumentid
+         */
+        instrumentId: string;
+    };
+    query?: never;
+    url: '/api/v1/contract-instruments/{instrumentId}/signing';
+};
+
+export type SetContractInstrumentSigningErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type SetContractInstrumentSigningError = SetContractInstrumentSigningErrors[keyof SetContractInstrumentSigningErrors];
+
+export type SetContractInstrumentSigningResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractDetail;
+};
+
+export type SetContractInstrumentSigningResponse = SetContractInstrumentSigningResponses[keyof SetContractInstrumentSigningResponses];
+
+export type WriteContractFactsData = {
+    body: FactsWrite;
+    path: {
+        /**
+         * Instrumentid
+         */
+        instrumentId: string;
+    };
+    query?: never;
+    url: '/api/v1/contract-instruments/{instrumentId}/facts';
+};
+
+export type WriteContractFactsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type WriteContractFactsError = WriteContractFactsErrors[keyof WriteContractFactsErrors];
+
+export type WriteContractFactsResponses = {
+    /**
+     * Successful Response
+     */
+    200: InstrumentRead;
+};
+
+export type WriteContractFactsResponse = WriteContractFactsResponses[keyof WriteContractFactsResponses];
+
+export type RemoveContractFileData = {
+    body?: never;
+    path: {
+        /**
+         * Contractid
+         */
+        contractId: string;
+        /**
+         * Fileid
+         */
+        fileId: string;
+    };
+    query?: never;
+    url: '/api/v1/contracts/{contractId}/files/{fileId}';
+};
+
+export type RemoveContractFileErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type RemoveContractFileError = RemoveContractFileErrors[keyof RemoveContractFileErrors];
+
+export type RemoveContractFileResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoveContractFileResponse = RemoveContractFileResponses[keyof RemoveContractFileResponses];
+
+export type DeleteContractInstrumentData = {
+    body?: never;
+    path: {
+        /**
+         * Instrumentid
+         */
+        instrumentId: string;
+    };
+    query?: never;
+    url: '/api/v1/contract-instruments/{instrumentId}';
+};
+
+export type DeleteContractInstrumentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type DeleteContractInstrumentError = DeleteContractInstrumentErrors[keyof DeleteContractInstrumentErrors];
+
+export type DeleteContractInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractDetail;
+};
+
+export type DeleteContractInstrumentResponse = DeleteContractInstrumentResponses[keyof DeleteContractInstrumentResponses];
+
+export type GetContractPricingData = {
+    body?: never;
+    path: {
+        /**
+         * Contractid
+         */
+        contractId: string;
+    };
+    query?: never;
+    url: '/api/v1/contracts/{contractId}/pricing';
+};
+
+export type GetContractPricingErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type GetContractPricingError = GetContractPricingErrors[keyof GetContractPricingErrors];
+
+export type GetContractPricingResponses = {
+    /**
+     * Successful Response
+     */
+    200: ContractPricing;
+};
+
+export type GetContractPricingResponse = GetContractPricingResponses[keyof GetContractPricingResponses];
+
+export type GetFuelAdjustmentData = {
+    body?: never;
+    path: {
+        /**
+         * Contractid
+         */
+        contractId: string;
+    };
+    query: {
+        /**
+         * On
+         */
+        on: string;
+    };
+    url: '/api/v1/contracts/{contractId}/fuel-adjustment';
+};
+
+export type GetFuelAdjustmentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type GetFuelAdjustmentError = GetFuelAdjustmentErrors[keyof GetFuelAdjustmentErrors];
+
+export type GetFuelAdjustmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: FuelAdjustment;
+};
+
+export type GetFuelAdjustmentResponse = GetFuelAdjustmentResponses[keyof GetFuelAdjustmentResponses];
+
+export type CreatePriceTableData = {
+    body: PriceTableWrite;
+    path?: never;
+    query?: never;
+    url: '/api/v1/price-tables';
+};
+
+export type CreatePriceTableErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type CreatePriceTableError = CreatePriceTableErrors[keyof CreatePriceTableErrors];
+
+export type CreatePriceTableResponses = {
+    /**
+     * Successful Response
+     */
+    201: PriceTableSummary;
+};
+
+export type CreatePriceTableResponse = CreatePriceTableResponses[keyof CreatePriceTableResponses];
+
+export type WithdrawPriceTableData = {
+    body: WithdrawRequest;
+    path: {
+        /**
+         * Tableid
+         */
+        tableId: string;
+    };
+    query?: never;
+    url: '/api/v1/price-tables/{tableId}/withdraw';
+};
+
+export type WithdrawPriceTableErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type WithdrawPriceTableError = WithdrawPriceTableErrors[keyof WithdrawPriceTableErrors];
+
+export type WithdrawPriceTableResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type WithdrawPriceTableResponse = WithdrawPriceTableResponses[keyof WithdrawPriceTableResponses];
+
+export type CreatePriceLinesData = {
+    body: PriceLinesCreate;
+    path: {
+        /**
+         * Tableid
+         */
+        tableId: string;
+    };
+    query?: never;
+    url: '/api/v1/price-tables/{tableId}/lines';
+};
+
+export type CreatePriceLinesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type CreatePriceLinesError = CreatePriceLinesErrors[keyof CreatePriceLinesErrors];
+
+export type CreatePriceLinesResponses = {
+    /**
+     * Response Create Price Lines
+     *
+     * Successful Response
+     */
+    201: Array<PriceLineRead>;
+};
+
+export type CreatePriceLinesResponse = CreatePriceLinesResponses[keyof CreatePriceLinesResponses];
+
+export type CorrectPriceLineData = {
+    body: PriceLineCorrection;
+    path: {
+        /**
+         * Lineid
+         */
+        lineId: string;
+    };
+    query?: never;
+    url: '/api/v1/price-lines/{lineId}';
+};
+
+export type CorrectPriceLineErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type CorrectPriceLineError = CorrectPriceLineErrors[keyof CorrectPriceLineErrors];
+
+export type CorrectPriceLineResponses = {
+    /**
+     * Successful Response
+     */
+    200: PriceLineRead;
+};
+
+export type CorrectPriceLineResponse = CorrectPriceLineResponses[keyof CorrectPriceLineResponses];
+
+export type WithdrawPriceLineData = {
+    body: WithdrawRequest;
+    path: {
+        /**
+         * Lineid
+         */
+        lineId: string;
+    };
+    query?: never;
+    url: '/api/v1/price-lines/{lineId}/withdraw';
+};
+
+export type WithdrawPriceLineErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type WithdrawPriceLineError = WithdrawPriceLineErrors[keyof WithdrawPriceLineErrors];
+
+export type WithdrawPriceLineResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type WithdrawPriceLineResponse = WithdrawPriceLineResponses[keyof WithdrawPriceLineResponses];
+
+export type CreateFuelClauseData = {
+    body: FuelClauseWrite;
+    path?: never;
+    query?: never;
+    url: '/api/v1/fuel-clauses';
+};
+
+export type CreateFuelClauseErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type CreateFuelClauseError = CreateFuelClauseErrors[keyof CreateFuelClauseErrors];
+
+export type CreateFuelClauseResponses = {
+    /**
+     * Successful Response
+     */
+    201: FuelClauseRead;
+};
+
+export type CreateFuelClauseResponse = CreateFuelClauseResponses[keyof CreateFuelClauseResponses];
+
+export type WithdrawFuelClauseData = {
+    body: WithdrawRequest;
+    path: {
+        /**
+         * Clauseid
+         */
+        clauseId: string;
+    };
+    query?: never;
+    url: '/api/v1/fuel-clauses/{clauseId}/withdraw';
+};
+
+export type WithdrawFuelClauseErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type WithdrawFuelClauseError = WithdrawFuelClauseErrors[keyof WithdrawFuelClauseErrors];
+
+export type WithdrawFuelClauseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type WithdrawFuelClauseResponse = WithdrawFuelClauseResponses[keyof WithdrawFuelClauseResponses];
+
+export type ListFuelPricesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Pagesize
+         */
+        pageSize?: number;
+        /**
+         * Fueltype
+         */
+        fuelType?: string | null;
+    };
+    url: '/api/v1/fuel-prices';
+};
+
+export type ListFuelPricesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type ListFuelPricesError = ListFuelPricesErrors[keyof ListFuelPricesErrors];
+
+export type ListFuelPricesResponses = {
+    /**
+     * Successful Response
+     */
+    200: PageFuelPriceRead;
+};
+
+export type ListFuelPricesResponse = ListFuelPricesResponses[keyof ListFuelPricesResponses];
+
+export type CreateFuelPriceData = {
+    body: FuelPriceWrite;
+    path?: never;
+    query?: never;
+    url: '/api/v1/fuel-prices';
+};
+
+export type CreateFuelPriceErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type CreateFuelPriceError = CreateFuelPriceErrors[keyof CreateFuelPriceErrors];
+
+export type CreateFuelPriceResponses = {
+    /**
+     * Successful Response
+     */
+    201: FuelPriceRead;
+};
+
+export type CreateFuelPriceResponse = CreateFuelPriceResponses[keyof CreateFuelPriceResponses];
+
+export type SyncFuelPricesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/fuel-prices/sync';
+};
+
+export type SyncFuelPricesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type SyncFuelPricesError = SyncFuelPricesErrors[keyof SyncFuelPricesErrors];
+
+export type SyncFuelPricesResponses = {
+    /**
+     * Successful Response
+     */
+    200: FuelPriceSyncReport;
+};
+
+export type SyncFuelPricesResponse = SyncFuelPricesResponses[keyof SyncFuelPricesResponses];
+
+export type DeleteFuelPriceData = {
+    body?: never;
+    path: {
+        /**
+         * Fuelpriceid
+         */
+        fuelPriceId: string;
+    };
+    query?: never;
+    url: '/api/v1/fuel-prices/{fuelPriceId}';
+};
+
+export type DeleteFuelPriceErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type DeleteFuelPriceError = DeleteFuelPriceErrors[keyof DeleteFuelPriceErrors];
+
+export type DeleteFuelPriceResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteFuelPriceResponse = DeleteFuelPriceResponses[keyof DeleteFuelPriceResponses];
+
+export type GetOverviewData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/overview';
+};
+
+export type GetOverviewErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Unprocessable Content
+     */
+    422: ErrorResponse;
+    /**
+     * Too Many Requests
+     */
+    429: ErrorResponse;
+};
+
+export type GetOverviewError = GetOverviewErrors[keyof GetOverviewErrors];
+
+export type GetOverviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: Overview;
+};
+
+export type GetOverviewResponse = GetOverviewResponses[keyof GetOverviewResponses];

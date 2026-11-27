@@ -49,3 +49,14 @@ class CursorParams(Schema):
     def after(self) -> tuple[datetime, uuid.UUID] | None:
         """The `(created_at, id)` pair the next page starts after."""
         return decode_cursor(self.cursor) if self.cursor else None
+
+
+class PageParams(Schema):
+    """Numbered pages for tables a person browses (ADR 0008)."""
+
+    page: int = Field(default=1, ge=1, le=10_000)
+    page_size: int = Field(default=20, ge=1, le=100)
+
+    @property
+    def offset(self) -> int:
+        return (self.page - 1) * self.page_size

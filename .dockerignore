@@ -12,3 +12,6 @@
 **/.venv
 **/*.log
 docker-compose*.yml
+# Contract archive (3.5 GB, real data) and live secrets never enter an image.
+docs
+.env.live

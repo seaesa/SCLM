@@ -1,0 +1,368 @@
+===== BẮT ĐẦU ĐOẠN CHAT =====
+
+NGƯỜI DÙNG:
+phân tích nghiệp vụ hệ thống quản lý hợp đồng và phù lục (contract management system). tập trung khai thác overview, chi tiết nghiệp vụ và làm rõ yêu cầu với stakeholder
+
+TRỢ LÝ:
+Phân tích nghiệp vụ cho hệ thống quản lý hợp đồng và phụ lục cần bắt đầu từ việc làm rõ ranh giới khái niệm, vì “phụ lục” trong tiếng Việt thường bị dùng lẫn lộn giữa ba loại chứng từ có bản chất pháp lý và quy trình phê duyệt khác nhau. Nếu không tách bạch ngay từ đầu, toàn bộ mô hình dữ liệu, workflow và yêu cầu kiểm soát sẽ bị sai lệch.
+
+---
+
+## 1. Tổng quan hệ thống (Overview)
+
+Hệ thống quản lý hợp đồng và phụ lục là nền tảng số hóa vòng đời hợp đồng từ khởi tạo, đàm phán, phê duyệt, ký kết, lưu trữ đến theo dõi nghĩa vụ sau ký và quản lý thay đổi. Điểm khác biệt cốt lõi so với một kho lưu trữ tài liệu thông thường nằm ở **quản lý mối quan hệ phái sinh giữa hợp đồng gốc và các phụ lục/chỉnh sửa**, duy trì tính toàn vẹn của lịch sử pháp lý và đảm bảo mọi thay đổi đều có thể truy vết ngược.
+
+Một hệ thống trưởng thành thường bao phủ các miền nghiệp vụ sau:
+
+| Miền nghiệp vụ | Phạm vi cốt lõi |
+|---|---|
+| Quản lý hồ sơ hợp đồng | Metadata, tài liệu, phiên bản, trạng thái vòng đời |
+| Quản lý phụ lục / chỉnh sửa | Tạo, liên kết với hợp đồng gốc, kiểm soát phiên bản |
+| Workflow phê duyệt | Định tuyến theo loại chứng từ, ma trận thẩm quyền |
+| Quản lý nghĩa vụ | Theo dõi cam kết, mốc thời gian, cảnh báo |
+| Kiểm soát tuân thủ | Audit trail bất biến, phân quyền chi tiết, lịch sử thay đổi |
+| Tích hợp | ERP, CRM, hệ thống chữ ký số, IAM |
+
+---
+
+## 2. Phân biệt ba loại “phụ lục” — nền tảng của mọi yêu cầu nghiệp vụ
+
+Đây là điểm cần làm rõ với stakeholder **trước khi** bàn đến bất kỳ yêu cầu chức năng nào. Ba khái niệm thường bị gộp chung nhưng có hệ quả pháp lý và vận hành khác nhau:
+
+**Phụ lục (Appendix / Annex)** — tài liệu đính kèm tại thời điểm ký kết, cung cấp thông tin tham chiếu như thông số kỹ thuật, lịch trình, biểu mẫu. Phụ lục **không thay đổi điều khoản** của hợp đồng chính; nó là một phần của hồ sơ hợp đồng nhưng không làm phát sinh nghĩa vụ mới. Quy trình phê duyệt thường ngắn hơn vì bản chất không tranh chấp.
+
+**Addendum** — bổ sung điều khoản mới sau khi hợp đồng đã ký, nhưng **không sửa đổi** nội dung gốc. Hợp đồng gốc vẫn giữ nguyên hiệu lực, addendum tồn tại song song và bổ sung.
+
+**Amendment (Chỉnh sửa hợp đồng)** — **thay đổi, xóa hoặc thay thế** điều khoản đã có. Đây là loại có rủi ro pháp lý cao nhất, đòi hỏi thẩm quyền phê duyệt đầy đủ và kiểm soát phiên bản chặt chẽ nhất.
+
+SAP phân biệt rõ trong cấu hình workflow: hợp đồng chính thường trải qua chuỗi **“draft → review → await approval → external review → supplier draft → approval”**, trong khi phụ lục có thể chỉ cần **“draft → review → approval”**. Đây là căn cứ để thiết kế **workflow theo loại chứng từ**, không áp dụng một quy trình chung cho tất cả.
+
+> **Hệ quả cho phân tích:** Stakeholder thường dùng từ “phụ lục” để chỉ cả ba loại trên. Cần thống nhất taxonomy ngay từ giai đoạn khảo sát, nếu không yêu cầu về workflow, quyền hạn và báo cáo sẽ không thể đặc tả chính xác.
+
+---
+
+## 3. Chi tiết nghiệp vụ cốt lõi
+
+### 3.1. Vòng đời hợp đồng và điểm chèn của phụ lục
+
+Một vòng đời điển hình gồm: **Yêu cầu → Soạn thảo → Đàm phán → Phê duyệt → Ký kết → Thực hiện → Gia hạn/Chấm dứt → Lưu trữ**. Phụ lục có thể phát sinh ở hai thời điểm:
+
+- **Trước ký (pre-signature):** phụ lục kỹ thuật, phụ lục giá, phụ lục tiến độ — gắn với hợp đồng ngay khi ký.
+- **Sau ký (post-signature):** addendum hoặc amendment — phát sinh từ nhu cầu thay đổi phạm vi, gia hạn, điều chỉnh giá, hoặc xử lý tình huống bất khả kháng.
+
+Hệ thống cần hỗ trợ **quan hệ cha–con (parent–child)** giữa hợp đồng gốc và phụ lục, trong đó phụ lục kế thừa metadata của hợp đồng gốc nhưng có trạng thái và phiên bản độc lập. Khi một amendment được ký, phiên bản có hiệu lực của hợp đồng phải được cập nhật hoặc đánh dấu rõ **“phiên bản hiện hành bao gồm amendment số X”**.
+
+### 3.2. Quản lý phụ lục — các thao tác nghiệp vụ tối thiểu
+
+Từ thực tiễn các hệ thống như MISA, các thao tác cơ bản trên phụ lục bao gồm: **xem danh sách, thêm mới, xem chi tiết, sửa, xóa, nhân bản và in**. Tuy nhiên, ở góc độ phân tích nghiệp vụ, cần làm rõ hơn:
+
+**Liên kết dữ liệu:** Phụ lục phải tham chiếu đến hợp đồng gốc bằng khóa duy nhất. Trường thông tin tối thiểu gồm: số phụ lục, ngày ký, ngày hiệu lực, ngày hết hạn, “về việc” (subject), và tài liệu đính kèm. Hệ thống phải tự động cập nhật thông tin phụ lục vào hồ sơ hợp đồng chi tiết.
+
+**Kiểm soát phiên bản:** Mỗi lần sửa phụ lục phải tạo phiên bản mới, không ghi đè. Lịch sử phiên bản là bằng chứng pháp lý khi tranh chấp. PeopleSoft sử dụng **Document Version History** để ghi nhận từng hành động trên tài liệu và kết quả tương ứng, cho cả tài liệu gốc lẫn amendment.
+
+**Trạng thái và hiệu lực:** Phụ lục cần có trạng thái riêng (draft, pending approval, executed, expired, terminated) và không được coi là “có hiệu lực” chỉ vì đã được tạo. Chỉ khi hoàn tất workflow phê duyệt và ký, phụ lục mới tác động đến nghĩa vụ của hợp đồng.
+
+### 3.3. Kiểm soát thay đổi và audit trail
+
+Đây là yêu cầu nghiệp vụ có tính chất sống còn, đặc biệt với hợp đồng có giá trị lớn hoặc chịu sự giám sát của kiểm toán. Khi xảy ra tranh chấp, việc tái dựng **“thực tế các bên đã thỏa thuận gì”** qua tất cả các amendment là cực kỳ khó khăn nếu hệ thống không lưu giữ lịch sử đầy đủ.
+
+Yêu cầu tối thiểu:
+
+- **Audit trail bất biến:** mọi hành động xem, tạo, sửa, xóa, tải xuống, phê duyệt đều được ghi log với người thực hiện, thời gian và đối tượng tác động.
+- **So sánh phiên bản (redline/comparison):** khi một phụ lục được sửa đổi, hệ thống phải hiển thị rõ thay đổi so với phiên bản trước — cả về nội dung tài liệu lẫn metadata.
+- **Truy vết ngược từ phụ lục về hợp đồng gốc và ngược lại:** từ một hợp đồng đang có hiệu lực, phải xem được toàn bộ chuỗi phụ lục/addendum/amendment đã tác động đến nó.
+
+### 3.4. Workflow phê duyệt theo loại chứng từ
+
+Không thể áp dụng một quy trình phê duyệt duy nhất cho hợp đồng chính và phụ lục. Cần thiết kế **ma trận workflow** dựa trên:
+
+- **Loại chứng từ:** hợp đồng chính, phụ lục kỹ thuật, addendum, amendment.
+- **Giá trị và mức độ rủi ro:** amendment làm tăng giá trị hợp đồng đáng kể cần thêm cấp phê duyệt so với phụ lục kỹ thuật thuần túy.
+- **Thẩm quyền:** ai được tạo, ai được duyệt nội dung, ai được duyệt pháp lý, ai được ký.
+
+SAP cho phép cấu hình **phase sequence** riêng cho từng loại document type, và thay đổi cấu hình chỉ áp dụng cho tài liệu tạo mới, không ảnh hưởng hồi tố. Đây là nguyên tắc quan trọng: workflow phải **cấu hình được**, không hard-code.
+
+---
+
+## 4. Yêu cầu phi chức năng cần làm rõ
+
+Ngoài chức năng, stakeholder thường có kỳ vọng ngầm về các thuộc tính chất lượng mà nếu không làm rõ sẽ dẫn đến thất vọng khi nghiệm thu:
+
+| Nhóm yêu cầu | Câu hỏi cần làm rõ với stakeholder |
+|---|---|
+| **Bảo mật & phân quyền** | Phân quyền theo vai trò (RBAC) hay theo cả phòng ban + hợp đồng cụ thể? Ai được xem phụ lục của hợp đồng mà mình không trực tiếp phụ trách? |
+| **Toàn vẹn dữ liệu** | Có yêu cầu chống sửa đổi audit trail ở mức độ nào? Có cần lưu hash/hash chain cho tài liệu đã ký không? |
+| **Khả dụng & hiệu năng** | Số lượng hợp đồng và phụ lục dự kiến trong 1–3 năm? Thời gian phản hồi chấp nhận được khi tìm kiếm và so sánh phiên bản? |
+| **Tích hợp** | Có cần đồng bộ với ERP để đối chiếu nghĩa vụ thanh toán? Chữ ký số dùng giải pháp nào? |
+| **Tuân thủ pháp lý** | Hệ thống có cần đáp ứng yêu cầu cụ thể của Luật Giao dịch điện tử, quy định lưu trữ nội bộ, hoặc tiêu chuẩn kiểm toán nào không? |
+
+---
+
+## 5. Phân tích stakeholder và làm rõ yêu cầu
+
+### 5.1. Nhận diện stakeholder
+
+Với hệ thống hợp đồng, stakeholder không chỉ là người trực tiếp dùng hệ thống. Gatekeeper ước tính chi phí trung bình của một hợp đồng (tính theo thời gian của nhiều bên tham gia) vào khoảng **6.900 USD**, cho thấy số lượng vai trò liên quan thường bị đánh giá thấp. Các nhóm chính:
+
+**Nhóm sử dụng trực tiếp (operational):**
+- **Contract Requester / Người đề xuất:** tạo yêu cầu hợp đồng, khởi tạo phụ lục khi cần gia hạn/điều chỉnh. Cần giao diện đơn giản, template có sẵn, theo dõi trạng thái yêu cầu.
+- **Contract Manager / Chuyên viên quản lý hợp đồng:** soạn thảo, quản lý hồ sơ, theo dõi tiến độ ký kết và phụ lục, cập nhật trạng thái thực hiện. Đây là **key user** — người dùng quyết định hệ thống có “chạy được” trong thực tế hay không.
+- **Legal / Pháp chế:** thẩm định điều khoản, đặc biệt với amendment. Quan tâm đến tính chính xác pháp lý, khả năng so sánh phiên bản và kiểm soát thẩm quyền.
+- **Finance / Kế toán:** theo dõi nghĩa vụ thanh toán gắn với hợp đồng và phụ lục điều chỉnh giá trị. Cần dữ liệu đồng bộ, có thể tích hợp ERP.
+
+**Nhóm phê duyệt và quản trị:**
+- **Approver / Người phê duyệt theo thẩm quyền:** thường chỉ quan tâm đến **các trường thông tin then chốt** (tên đối tác, giá trị, thời hạn, loại thay đổi) và cần thao tác phê duyệt/từ chối nhanh chóng.
+- **IT / Quản trị hệ thống:** chịu trách nhiệm cấu hình workflow, phân quyền, tích hợp và vận hành. Cần yêu cầu rõ ràng về khả năng cấu hình, log, sao lưu.
+- **Lãnh đạo / Ban giám đốc:** quan tâm đến báo cáo tổng hợp, rủi ro tập trung, giá trị hợp đồng theo đơn vị, và tỷ lệ phụ lục làm tăng giá trị ngoài dự kiến.
+
+**Nhóm bên ngoài (nếu có):**
+- **Đối tác / Nhà cung cấp:** có thể tham gia vào quy trình đàm phán hoặc xác nhận phụ lục. Nếu có cổng cộng tác bên ngoài, yêu cầu về bảo mật và trải nghiệm người dùng bên ngoài cần được đặt ra sớm.
+
+### 5.2. Điểm đau (pain points) thường gặp — dùng làm đầu vào cho phỏng vấn
+
+Các câu hỏi khảo sát nên xoay quanh những vấn đề phổ biến đã được ghi nhận trong thực tiễn triển khai CLM:
+
+- Hợp đồng và phụ lục đang được quản lý phân tán bằng Excel, email, ổ đĩa dùng chung? **Không có một nguồn dữ liệu duy nhất (single source of truth)**.
+- Mất quá nhiều thời gian để phê duyệt hợp đồng và phụ lục? Không biết hồ sơ đang kẹt ở bước nào?
+- Bỏ lỡ ngày hết hạn, ngày gia hạn hoặc mốc nghĩa vụ quan trọng?
+- Khi có tranh chấp, không thể tái dựng chính xác chuỗi thay đổi và người phê duyệt?
+- Các phòng ban (pháp chế, mua hàng, tài chính) không nhìn thấy cùng một phiên bản tài liệu?
+
+Gatekeeper đưa ra một danh sách câu hỏi chẩn đoán tương tự và khuyến nghị dùng phương pháp **“Five Whys”** để đào sâu nguyên nhân gốc thay vì chỉ ghi nhận triệu chứng.
+
+### 5.3. Ma trận stakeholder – mối quan tâm – yêu cầu cần xác thực
+
+| Stakeholder | Mối quan tâm chính | Yêu cầu nghiệp vụ cần xác thực |
+|---|---|---|
+| Contract Manager | Kiểm soát toàn bộ hồ sơ, không bỏ sót phụ lục | Danh sách phụ lục theo hợp đồng; cảnh báo phụ lục sắp hết hạn; nhân bản phụ lục |
+| Legal | Tính chính xác và toàn vẹn pháp lý của amendment | So sánh phiên bản; khóa sửa sau khi ký; audit trail bất biến |
+| Finance | Nghĩa vụ thanh toán khớp với hợp đồng và phụ lục | Trường giá trị điều chỉnh; liên kết đến ERP; báo cáo thay đổi giá trị |
+| Approver | Ra quyết định nhanh trên thông tin cốt lõi | Dashboard tóm tắt; phê duyệt một chạm; thông báo đúng người |
+| IT | Hệ thống cấu hình được, dễ tích hợp, an toàn | Cấu hình workflow theo loại chứng từ; RBAC; log; API |
+| Lãnh đạo | Nhìn thấy bức tranh rủi ro và hiệu quả tổng thể | Báo cáo hợp đồng theo đơn vị; tỷ lệ amendment; thời gian chu kỳ |
+
+### 5.4. Cách tiếp cận làm rõ yêu cầu với stakeholder
+
+Michalsons khuyến nghị bắt đầu bằng **đánh giá hiện trạng**: vẽ lại từng bước của quy trình hợp đồng hiện tại, ghi nhận công cụ và phương thức đang dùng, sau đó **thu thập phản hồi từ tất cả các bên tương tác với hệ thống** — không chỉ pháp chế mà cả kinh doanh, nhân sự, mua hàng — thông qua khảo sát, phỏng vấn và workshop. Kết quả phân tích điểm đau sẽ là đầu vào để xây dựng danh sách tính năng must-have và phân loại ưu tiên theo tác động đến hiệu quả, tuân thủ và mức độ hài lòng người dùng.
+
+Một lộ trình làm rõ yêu cầu có thể tổ chức theo ba vòng:
+
+**Vòng 1 — Khám phá (Discovery):** Phỏng vấn bán cấu trúc với đại diện từng nhóm. Mục tiêu: xác nhận taxonomy phụ lục, vẽ quy trình hiện tại (as-is), nhận diện 3–5 điểm đau lớn nhất.
+
+**Vòng 2 — Đặc tả và xác thực:** Xây dựng quy trình đề xuất (to-be) và danh sách yêu cầu có thể kiểm chứng. Tổ chức workshop với key user (Contract Manager, Legal, Finance) để walkthrough các kịch bản: tạo phụ lục kỹ thuật, tạo amendment làm tăng giá trị, gia hạn hợp đồng, xử lý phụ lục bị từ chối. Ghi nhận rõ **ai làm gì, ở bước nào, với dữ liệu nào**.
+
+**Vòng 3 — Chốt ưu tiên và tiêu chí nghiệm thu:** Sử dụng ma trận impact/effort để phân loại yêu cầu. Với mỗi yêu cầu được chọn, xác định **tiêu chí nghiệm thu đo lường được** — ví dụ: “thời gian tạo và gửi phê duyệt một phụ lục ≤ 5 phút”, “100% amendment có audit trail hiển thị được người duyệt và thời điểm duyệt”.
+
+---
+
+## 6. Các câu hỏi chưa được trả lời — cần ưu tiên làm rõ
+
+Đây là những điểm mà phân tích hiện tại **chưa thể kết luận** nếu không có thông tin từ bối cảnh cụ thể của tổ chức:
+
+1. **Phân loại phụ lục:** Tổ chức dùng “phụ lục” theo nghĩa nào trong ba nghĩa nêu trên? Có sự phân biệt rõ ràng trong quy chế nội bộ không, hay đang dùng chung một mẫu?
+2. **Thẩm quyền ký phụ lục:** Ai có quyền ký phụ lục? Có khác biệt giữa phụ lục kỹ thuật và amendment không?
+3. **Tác động đến nghĩa vụ:** Khi một amendment được ký, hệ thống có cần tự động điều chỉnh kế hoạch thanh toán/nghĩa vụ trong ERP, hay chỉ ghi nhận để đối chiếu thủ công?
+4. **Phụ lục của phụ lục:** Có cho phép phụ lục lồng nhau (phụ lục điều chỉnh phụ lục trước đó) không? Nếu có, giới hạn phân cấp là bao nhiêu?
+5. **Lưu trữ và tiêu hủy:** Thời hạn lưu trữ hợp đồng và phụ lục theo quy định nội bộ/pháp luật là bao lâu? Có yêu cầu tiêu hủy có kiểm soát sau thời hạn không?
+
+Việc trả lời những câu hỏi này trước khi chốt yêu cầu chức năng sẽ quyết định đến **mô hình dữ liệu, thiết kế workflow và mức độ phức tạp của phân quyền** — ba yếu tố khó thay đổi nhất về sau.
+
+NGƯỜI DÙNG:
+sau khi phân tích và làm rõ yêu cầu. với trách nhiệm là 1 BA tôi nên có những tài liệu tối thiểu nào cho 1 hệ thống phần mềm. quản lý hợp đồng ở đây là trong lĩnh vực logistics forwader
+
+TRỢ LÝ:
+Với vai trò BA trong một dự án **hệ thống quản lý hợp đồng cho freight forwarder**, bộ tài liệu bạn cần chuẩn bị không chỉ là danh sách các “loại giấy tờ” theo chuẩn chung, mà phải phản ánh được **cấu trúc hợp đồng đặc thù của ngành forwarder**: hợp đồng khung (MSA) đi kèm phụ lục cước/biểu phí, hợp đồng với carrier/subcontractor, và các điều khoản phụ phí như demurrage/detention, fuel surcharge, toll. Dưới đây là bộ tài liệu tối thiểu, được tổ chức theo **mục đích sử dụng** để bạn vừa đủ đáp ứng yêu cầu dự án, vừa thể hiện được chiều sâu nghiệp vụ logistics.
+
+---
+
+### 1. Nhóm tài liệu định hình phạm vi và “bức tranh” nghiệp vụ (Why & What)
+
+Đây là lớp tài liệu giúp stakeholder thấy bạn hiểu đúng bối cảnh forwarder, trước khi đi vào chi tiết chức năng.
+
+**Project Vision Document / Product Vision**
+Mô tả ngắn gọn vấn đề hiện tại (hợp đồng và phụ lục cước nằm rải rác trong Excel, email, không kiểm soát được hiệu lực của bảng giá), mục tiêu của hệ thống (một nguồn dữ liệu duy nhất cho toàn bộ hợp đồng vận tải, đại lý, kho bãi), và giá trị kỳ vọng (giảm rủi ro áp dụng sai bảng giá, kiểm soát phụ phí, tự động cảnh báo gia hạn). Đây là tài liệu “neo” để mọi yêu cầu chi tiết sau này không đi lệch khỏi mục tiêu.
+
+**BRD – Business Requirement Document**
+BRD trả lời câu hỏi **“doanh nghiệp cần gì”**, tập trung vào mục tiêu kinh doanh và yêu cầu cấp cao của các bên liên quan, không đi sâu vào giải pháp kỹ thuật. Với forwarder, BRD cần làm rõ:
+
+- **Các loại hợp đồng nào được đưa vào hệ thống**: hợp đồng khung với khách hàng (MSA), phụ lục cước/rate card, hợp đồng với carrier (hãng tàu/hãng bay), hợp đồng với đại lý nước ngoài, hợp đồng kho bãi (nếu có).
+- **Mối quan hệ giữa hợp đồng chính và phụ lục cước**: phụ lục cước có hiệu lực độc lập hay phụ thuộc vào hợp đồng khung; khi phụ lục hết hạn thì hợp đồng khung còn hiệu lực hay không.
+- **Ai là stakeholder quyết định giá trị hợp đồng**: Sales, Procurement (mua cước từ carrier), hay Operations (theo từng lô).
+
+**Stakeholder Map / Phân tích stakeholder**
+Không chỉ liệt kê tên phòng ban, mà cần thể hiện **mức độ ảnh hưởng và mối quan tâm đặc thù** trong ngành forwarder. Ví dụ: Procurement quan tâm đến cước mua vào và phụ phí; Sales quan tâm đến cước bán ra và hiệu lực báo giá; Operations quan tâm đến việc tra cứu nhanh bảng giá khi làm booking; Finance quan tâm đến đối chiếu cước và phụ phí phát sinh (demurrage/detention). Tài liệu này giúp bạn biết ai cần được phỏng vấn sâu và ai chỉ cần xác nhận ở mức tổng quan.
+
+---
+
+### 2. Nhóm tài liệu mô tả quy trình và luồng nghiệp vụ (How it flows)
+
+**Current-State Process Maps (As-Is) và Gap Analysis**
+Vẽ lại quy trình hiện tại từ lúc **phát sinh nhu cầu ký hợp đồng/phụ lục cước** → soạn thảo → phê duyệt → ký → nhập bảng giá vào hệ thống vận hành → theo dõi hiệu lực. Ghi nhận rõ điểm nghẽn: ai đang giữ file rate card, làm sao Operations biết bảng giá nào đang áp dụng, phụ phí được cập nhật bằng cách nào. Gap Analysis chỉ ra khoảng cách giữa hiện trạng và mục tiêu, làm cơ sở để ưu tiên yêu cầu.
+
+**Future-State Process Maps (To-Be)**
+Mô tả quy trình mong muốn, trong đó thể hiện rõ **điểm chèn của phụ lục cước** vào vòng đời hợp đồng khung. Ví dụ: khi một phụ lục cước mới được ký, hệ thống phải tự động vô hiệu hóa phụ lục cũ trong cùng phạm vi tuyến/loại hàng, và cập nhật bảng giá mà Operations tra cứu. Đây là tài liệu đặc biệt quan trọng với forwarder vì **tính hiệu lực theo thời gian của cước** ảnh hưởng trực tiếp đến việc tính giá và đối chiếu hóa đơn.
+
+**Use Cases / User Stories kèm Acceptance Criteria**
+Thay vì viết use case chung chung kiểu “quản lý hợp đồng”, hãy viết các use case **gắn với tình huống forwarder**:
+
+- *“Procurement tạo phụ lục cước mới cho tuyến Shanghai – HCM, áp dụng từ ngày X, thay thế phụ lục cũ.”*
+- *“Operations tra cứu bảng giá đang có hiệu lực cho một lô hàng FCL, bao gồm phụ phí BAF/CAF nếu có.”*
+- *“Finance nhận cảnh báo khi một phụ lục cước sắp hết hạn trong 30 ngày.”*
+
+Mỗi user story cần có **Acceptance Criteria đo lường được**, ví dụ: “Khi phụ lục mới được ký, trong vòng 5 phút hệ thống phải ngừng hiển thị phụ lục cũ trong màn hình tra cứu cước của Operations.”
+
+---
+
+### 3. Nhóm tài liệu đặc tả chi tiết cho phát triển (What exactly to build)
+
+**FSD / FRS – Functional Specification Document**
+FSD tập trung vào **hành vi chức năng cụ thể của hệ thống**: màn hình nào, trường dữ liệu nào, luồng trạng thái nào, điều kiện ràng buộc nào. Với hệ thống hợp đồng forwarder, FSD cần đặc tả rõ:
+
+- **Cấu trúc dữ liệu của một phụ lục cước**: không chỉ là file đính kèm, mà là các **bảng cước có cấu trúc** (tuyến, loại container, loại hàng, mức cước, đơn vị tiền tệ, ngày hiệu lực, phụ phí đi kèm). Nếu hệ thống chỉ lưu file PDF, Operations sẽ không thể tra cứu và so sánh cước.
+- **Cơ chế kế thừa và ghi đè giữa hợp đồng khung và phụ lục**: khi một phụ lục cước mới được ký, trường nào được kế thừa từ hợp đồng khung, trường nào bị ghi đè.
+- **Quy tắc hiệu lực theo thời gian**: xử lý trường hợp hai phụ lục cước cùng hiệu lực trên một tuyến (do chồng lấn thời gian), hoặc phụ lục mới có ngày hiệu lực trong quá khứ.
+
+**SRS – System Requirement Specification**
+SRS bao gồm cả **yêu cầu chức năng và phi chức năng** ở mức hệ thống. Phần phi chức năng đặc biệt quan trọng với hệ thống hợp đồng logistics:
+
+- **Hiệu năng tra cứu cước**: Operations cần tra cứu bảng giá đang hiệu lực trong vài giây, kể cả khi có hàng nghìn phụ lục cước.
+- **Tích hợp với TMS/ERP**: hợp đồng và phụ lục cước phải đồng bộ với hệ thống vận hành để phục vụ tính giá và đối chiếu hóa đơn.
+- **Audit trail và bảo mật**: ai được sửa phụ lục cước, ai được xem cước mua vào (thường là thông tin nhạy cảm giữa Procurement và Sales).
+
+**Requirement Traceability Matrix (RTM)**
+Bảng ánh xạ từ **yêu cầu nghiệp vụ (BRD) → yêu cầu chức năng (FSD/SRS) → use case/user story → test case**. Với dự án có nhiều loại hợp đồng và phụ lục, RTM giúp đảm bảo không bỏ sót yêu cầu nào và là bằng chứng khi nghiệm thu.
+
+---
+
+### 4. Nhóm tài liệu dữ liệu và tích hợp (nền tảng cho vận hành)
+
+**Data Dictionary / Từ điển dữ liệu nghiệp vụ**
+Định nghĩa thống nhất các khái niệm đặc thù forwarder mà nếu không làm rõ sẽ gây tranh cãi khi triển khai: “rate card”, “phụ lục cước”, “phụ phí biến đổi” (BAF, CAF, congestion surcharge), “demurrage”, “detention”, “free time”. Mỗi khái niệm cần mapping với trường dữ liệu cụ thể trong hệ thống.
+
+**Integration Specification (nếu có tích hợp)**
+Mô tả luồng dữ liệu giữa hệ thống quản lý hợp đồng và **TMS/ERP/kế toán**: trường nào được đồng bộ, tần suất, chiều đồng bộ, xử lý xung đột khi phụ lục cước thay đổi nhưng giao dịch đã phát sinh.
+
+---
+
+### 5. Nhóm tài liệu phục vụ kiểm thử và nghiệm thu
+
+**Test Plan & Test Cases (ở mức nghiệp vụ)**
+BA không nhất thiết viết toàn bộ test case kỹ thuật, nhưng cần cung cấp **test scenarios nghiệp vụ** để QA và stakeholder kiểm chứng. Ví dụ:
+
+- Ký phụ lục cước mới thay thế phụ lục cũ → Operations chỉ thấy đúng một bảng giá hiệu lực.
+- Phụ lục cước hết hạn mà không có phụ lục thay thế → hệ thống cảnh báo cho Procurement và Operations.
+- Tra cứu cước cho lô hàng có phụ phí demurrage → hệ thống hiển thị đúng mức phụ phí theo phụ lục tương ứng.
+
+**UAT Scenarios / Acceptance Criteria**
+Tập trung vào **kịch bản nghiệp vụ end-to-end** mà stakeholder quan tâm nhất, thay vì liệt kê từng màn hình. Đây là cơ sở để sign-off.
+
+---
+
+### Lưu ý riêng cho bối cảnh forwarder
+
+Điều khác biệt lớn nhất so với một hệ thống quản lý hợp đồng thông thường là **phụ lục cước không chỉ là tài liệu pháp lý, mà là dữ liệu vận hành sống**. Nếu BA chỉ dừng ở việc mô tả “quản lý phụ lục” như một tài liệu đính kèm, hệ thống sẽ không giải quyết được bài toán cốt lõi của forwarder: **làm sao để Operations và Finance luôn tra cứu đúng bảng giá đang có hiệu lực, và kiểm soát được phụ phí phát sinh**. Vì vậy, trong tất cả các tài liệu từ BRD đến FSD, hãy xuyên suốt nguyên tắc: **phụ lục cước phải được mô hình hóa như dữ liệu có cấu trúc, có hiệu lực theo thời gian, và có thể truy vấn**, không chỉ là file lưu trữ.
+
+Bộ tài liệu tối thiểu trên là đủ để bạn vừa kiểm soát được phạm vi dự án, vừa thể hiện năng lực nghiệp vụ logistics với stakeholder, đồng thời tạo nền tảng để đội phát triển và QA làm việc mà không phải “đoán” ý BA.
+
+NGƯỜI DÙNG:
+mấu chốt vẫn là đưa toàn bộ hợp đồng từ trước đến nay lên hệ thống xử lý và phân loại thông tin. nhưng vấn đề là mối hợp đồng khách hàng đều khác nhau. bạn có ý tưởng gì để đưa toàn bộ thông tin lên hệ thống không?
+
+TRỢ LÝ:
+Vấn đề bạn nêu chính là **điểm chết** của phần lớn dự án CLM trong logistics: cố gắng tìm một mẫu hợp đồng chung để “chuẩn hóa” trong khi mỗi khách hàng lại có một biểu cước, một bộ phụ phí và một cách diễn đạt điều khoản khác nhau. Cách tiếp cận khả thi không phải là làm cho các hợp đồng giống nhau, mà là **tách “tài liệu pháp lý” ra khỏi “dữ liệu vận hành”**, rồi xây một lớp cấu trúc đủ linh hoạt để chứa phần khác biệt mà không phá vỡ khả năng tra cứu và kiểm soát.
+
+---
+
+### 1. Nguyên tắc gốc: “Schema-first”, không phải “document-first”
+
+Sai lầm phổ biến là scan toàn bộ hợp đồng, nhét vào một kho file, rồi kỳ vọng hệ thống “hiểu” được. Hệ quả là kho lưu trữ thì đầy mà Operations vẫn không tra cứu được cước, Finance vẫn không đối chiếu được phụ phí.
+
+Hướng đúng là **thiết kế lược đồ dữ liệu trước khi trích xuất** (schema-first design). Nghĩa là bạn phải trả lời trước: **hệ thống cần trường dữ liệu nào để phục vụ những quyết định nào?** Một dự án nghiên cứu về trích xuất điều khoản demurrage từ hợp đồng vận tải không cấu trúc (PDF, email) đã áp dụng đúng nguyên tắc này: xây dựng lược đồ quan hệ chuẩn hóa trước, rồi mới dùng LLM mã nguồn mở để trích xuất, kết hợp con người kiểm chứng các trường hợp không chắc chắn.
+
+Với forwarder, lược đồ lõi tối thiểu thường xoay quanh:
+
+- **Định danh hợp đồng**: số hợp đồng, khách hàng/đối tác, loại hợp đồng (MSA, hợp đồng carrier, hợp đồng đại lý), ngày hiệu lực, ngày hết hạn.
+- **Cấu trúc cước**: tuyến (origin–destination), phương thức (FCL/LCL/Air), loại hàng, mức cước cơ bản, đơn vị tiền tệ.
+- **Phụ phí**: loại phụ phí (BAF, CAF, THC, demurrage, detention, toll…), cách tính (cố định/theo ngày/theo container), điều kiện áp dụng.
+- **Điều khoản vận hành quan trọng**: free time, điều kiện thanh toán, điều khoản chấm dứt, luật áp dụng.
+
+Nguyên tắc then chốt: **giữ danh sách trường bắt buộc thật ngắn**. Mỗi trường đưa vào migration là một trường ai đó phải duy trì về sau; trường nào không phục vụ cảnh báo, phê duyệt, báo cáo hay trả lời kiểm toán thì nên để trong toàn văn tài liệu và dùng tìm kiếm full-text, không cần cấu trúc hóa.
+
+---
+
+### 2. Phân tầng hợp đồng cũ: không phải tất cả đều cần “lên hệ thống” giống nhau
+
+Đây là cách giải tỏa áp lực “mỗi hợp đồng một kiểu”. Bạn không cần trích xuất cùng một mức độ chi tiết cho toàn bộ lịch sử hợp đồng. Phân tầng theo **giá trị + thời hạn + rủi ro**:
+
+| Tầng | Tiêu chí | Mức độ migration |
+|---|---|---|
+| **Ưu tiên cao** | Đang trong thời hạn thực hiện, giá trị lớn, có rủi ro tranh chấp, khách hàng trọng điểm | Toàn văn + trích xuất đầy đủ các trường lõi và bảng cước có cấu trúc |
+| **Ưu tiên trung bình** | Mới hết hạn gần đây, còn giá trị tham chiếu | Trích xuất các trường chính + lưu toàn văn; bảng cước có thể chỉ lưu file đính kèm nếu không còn dùng để tính giá |
+| **Ưu tiên thấp** | Đã hết hạn từ lâu, không tranh chấp | Chỉ đăng ký thông tin tóm tắt (số hợp đồng, đối tác, thời gian, giá trị) và lưu trữ điện tử |
+
+Cách phân tầng này được khuyến nghị trong thực tiễn migration hợp đồng tồn đọng: hợp đồng đã thực hiện xong và không tranh chấp có thể chỉ giữ thông tin then chốt hoặc thậm chí chỉ lưu trữ điện tử, trong khi hợp đồng đang thực hiện và có rủi ro cần được迁移 đầy đủ. Điều này giúp giảm khối lượng trích xuất xuống mức khả thi, đồng thời vẫn đảm bảo hệ thống mới không trở thành “bãi rác dữ liệu bán cấu trúc”.
+
+---
+
+### 3. Trích xuất bằng AI/LLM + con người kiểm chứng, thay vì ép mọi hợp đồng vào một template
+
+Các giải pháp trích xuất tài liệu logistics hiện đại không dựa trên template cứng. Chúng dùng **OCR + Computer Vision + LLM** để đọc hiểu trường dữ liệu ngay cả khi định dạng hoặc nội dung thay đổi. Điểm khác biệt so với OCR truyền thống: khi format thay đổi, hệ thống không “sập” và không cần train lại model từ đầu; nó thích nghi và chỉ đánh dấu các trường không chắc chắn để con người kiểm tra. Một giải pháp của Forto cho logistics ghi nhận độ chính xác trích xuất trên 95%, tiết kiệm tới 53 phút xử lý thủ công mỗi lô, và có cơ chế tự học từ các chỉnh sửa của con người.
+
+Với bối cảnh hợp đồng forwarder, quy trình thực tế nên là:
+
+**Bước 1 — Trích xuất tự động các trường “neo”**: số hợp đồng, tên đối tác, ngày hiệu lực, ngày hết hạn, giá trị, loại tiền. Đây là những trường tương đối ổn định về mặt ngữ nghĩa dù cách trình bày khác nhau.
+
+**Bước 2 — Trích xuất bảng cước và phụ phí ở dạng bán cấu trúc**: AI đọc bảng, nhận diện tuyến, loại container, mức giá; nhưng **luôn gắn cờ “cần kiểm chứng”** cho các dòng có định dạng bất thường hoặc ngữ nghĩa mơ hồ. Con người (Operations hoặc Procurement) xác nhận trước khi dữ liệu được coi là “có hiệu lực” trong hệ thống.
+
+**Bước 3 — Lưu toàn văn hợp đồng gốc song song với dữ liệu trích xuất**. Dữ liệu cấu trúc phục vụ tra cứu và tính toán; toàn văn phục vụ đối chiếu pháp lý và kiểm toán. Hai lớp này liên kết với nhau bằng cùng một mã định danh hợp đồng.
+
+Cách làm này thừa nhận một thực tế: **AI có thể đọc tốt phần lớn hợp đồng, nhưng không thể đảm bảo đúng 100% với mọi biến thể ngôn ngữ**. Giá trị của hệ thống không nằm ở việc loại bỏ hoàn toàn con người, mà ở việc **dồn con người vào đúng chỗ cần kiểm tra** thay vì nhập liệu thủ công toàn bộ.
+
+---
+
+### 4. Mô hình dữ liệu “lõi + phần mở rộng” để chứa sự khác biệt mà không phá vỡ cấu trúc
+
+Đây là câu trả lời trực tiếp cho vấn đề “mỗi hợp đồng một kiểu”. Bạn không cần một bảng duy nhất chứa mọi trường có thể có. Thiết kế nên gồm:
+
+**Lớp lõi (core schema)**: các trường mà **mọi hợp đồng đều phải có** để hệ thống vận hành thống nhất — định danh, đối tác, thời hạn, trạng thái, quan hệ cha–con với phụ lục. Đây là nền tảng cho cảnh báo, phân quyền và báo cáo tổng hợp.
+
+**Lớp mở rộng (extended attributes)**: nơi chứa các thuộc tính đặc thù của từng hợp đồng hoặc từng nhóm khách hàng, được lưu dưới dạng **cặp khóa–giá trị có kiểm soát** (ví dụ: `{"loai_phu_phi": "demurrage", "cach_tinh": "per_container_per_day", "muc_phi": 120, "don_vi": "USD"}`), thay vì thêm cột mới cho mỗi biến thể. Cách này cho phép cùng một hệ thống vừa chứa hợp đồng có phụ phí BAF theo % vừa chứa hợp đồng có phụ phí cố định theo container, mà không cần thay đổi cấu trúc bảng mỗi lần gặp kiểu mới.
+
+**Liên kết cha–con (parent–child linkage)**: đây là yêu cầu bắt buộc để xử lý hợp đồng khung + nhiều phụ lục cước. Mỗi phụ lục phải trỏ về đúng hợp đồng gốc; hệ thống phải hiển thị được **chuỗi phụ lục theo thời gian** và xác định phụ lục nào đang có hiệu lực trên từng tuyến/dịch vụ. Các nền tảng CLM trưởng thành dùng cơ chế “contract repository tree” với quan hệ parent–child để tự động liên kết amendment, phụ lục và tài liệu hỗ trợ về hợp đồng gốc. Với forwarder, đây chính là cơ chế để trả lời câu hỏi vận hành quan trọng nhất: “Với tuyến này, khách hàng này, **bảng cước nào đang áp dụng hôm nay**?”
+
+---
+
+### 5. Trình tự thực hiện thực tế: đừng “đổ” toàn bộ kho hợp đồng vào hệ thống cùng lúc
+
+Kinh nghiệm migration hợp đồng cho thấy thứ tự công việc quan trọng hơn công cụ. Các nhóm thường thất bại vì trích xuất trước khi xác định phạm vi (trả tiền hai lần cho tài liệu sau đó bị loại), hoặc load dữ liệu trước khi chuẩn hóa (dẫn đến cùng một đối tác có ba cách viết khác nhau trong báo cáo).
+
+Trình tự nên áp dụng cho bối cảnh của bạn:
+
+**Bước 1 — Kiểm kê và phân loại nguồn (1–2 tuần)**: liệt kê mọi nơi đang chứa hợp đồng (ổ chung, email, tủ hồ sơ, hệ thống cũ). Với mỗi nguồn, ghi nhận người sở hữu, định dạng, khối lượng ước tính. Đồng thời gắn nhãn sơ bộ: hợp đồng khung, phụ lục cước, hợp đồng carrier, hợp đồng đại lý. Bước này tạo ra “bản đồ kho báu” trước khi động vào bất kỳ file nào.
+
+**Bước 2 — Chọn mẫu thí điểm (pilot) 200–300 tài liệu đại diện**: chọn ngẫu nhiên hoặc có chủ đích các hợp đồng thuộc nhiều kiểu khách hàng, nhiều định dạng, nhiều loại phụ phí khác nhau. Chạy thử quy trình trích xuất trên mẫu này, đo **tỷ lệ lỗi theo từng trường** và thời gian xử lý thực tế. Chỉ sau khi pilot cho thấy chất lượng chấp nhận được mới cam kết phương pháp và ngân sách cho toàn bộ.
+
+**Bước 3 — Chuẩn hóa taxonomy trước khi load diện rộng**: thống nhất cách gọi tên đối tác (cùng một khách hàng có thể xuất hiện với nhiều biến thể tên pháp lý), cách phân loại hợp đồng, cách định nghĩa phụ phí. Nếu bỏ qua bước này, dữ liệu load vào sẽ “chạy được” nhưng báo cáo sẽ không thể đối chiếu.
+
+**Bước 4 — Load theo từng đợt, ưu tiên hợp đồng đang hiệu lực**: bắt đầu với các hợp đồng đang trong thời hạn thực hiện và có ảnh hưởng vận hành ngay. Hợp đồng lịch sử có thể load sau theo tầng ưu tiên đã định.
+
+**Bước 5 — Kiểm chứng bằng mẫu và đóng băng kho cũ**: sau khi load, lấy mẫu ngẫu nhiên đối chiếu với tài liệu gốc, ghi nhận tỷ lệ chính xác theo trường. Khi đã đạt ngưỡng chấp nhận, chuyển kho cũ sang chế độ **chỉ đọc** để tránh tình trạng hai nguồn dữ liệu cùng tồn tại và xung đột.
+
+---
+
+### 6. Một lưu ý riêng cho forwarder: tách “hợp đồng” khỏi “bảng cước”
+
+Trong logistics, phần lớn sự “khác nhau” giữa các hợp đồng khách hàng không nằm ở điều khoản pháp lý (thường khá giống nhau theo mẫu của forwarder), mà nằm ở **cấu trúc bảng cước và phụ phí**. Vì vậy, về mặt mô hình dữ liệu, nên tách:
+
+- **Hợp đồng (legal wrapper)**: file toàn văn + metadata pháp lý + điều khoản chung.
+- **Bảng cước (rate sheet)**: dữ liệu có cấu trúc, có hiệu lực theo thời gian, có thể có nhiều phiên bản, có thể thay thế nhau bằng phụ lục.
+
+Khi tách được hai lớp này, bạn có thể cho phép mỗi khách hàng có một “rate sheet” với cấu trúc cột khác nhau ở lớp mở rộng, trong khi vẫn giữ được một lớp lõi chung để tra cứu, so sánh và cảnh báo. Đây cũng là cách các hệ thống như Shipwell xử lý: cho phép import hợp đồng chứa nhiều làn vận tải và nhiều loại bảng cước khác nhau từ bảng tính, thay vì áp đặt một định dạng cước duy nhất.
+
+---
+
+Tóm lại, ý tưởng cốt lõi để đưa toàn bộ hợp đồng khách hàng không đồng nhất lên hệ thống là: **thiết kế lược đồ lõi trước, phân tầng ưu tiên migration, dùng AI trích xuất có kiểm chứng thay vì ép template, và xây lớp mở rộng đủ linh hoạt để chứa phần khác biệt** — trong khi vẫn giữ liên kết cha–con chặt chẽ giữa hợp đồng khung và phụ lục cước.
+
+NGƯỜI DÙNG:
+xuất toàn bộ đoạn chat này ra file txt
+
+===== KẾT THÚC ĐOẠN CHAT =====

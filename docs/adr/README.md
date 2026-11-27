@@ -13,6 +13,10 @@ Write one **before** changing such a decision, not after.
 | [0002](0002-configuration.md)           | Configuration comes from the environment, validated at startup, no defaults in code |
 | [0003](0003-api-versioning.md)          | API evolves additively under `/api/v1`; breaking changes are gated                  |
 | [0004](0004-access-control.md)          | Permission-based access control with roles mapped in code                           |
+| [0005](0005-file-storage.md)            | Contract files in S3-compatible storage, content-addressed, never overwritten       |
+| [0006](0006-partner-source.md)          | Partners synchronized from MISA through a source protocol (JSON for now)            |
+| [0007](0007-field-provenance.md)        | Contract facts carry source, page and author; a person confirms them by publishing  |
+| [0008](0008-numbered-pages.md)          | Business lists are paginated by page number with a total; cursors only for feeds    |
 
 Template:
 

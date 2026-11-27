@@ -1,6 +1,8 @@
 import asyncio
 import socket
+import uuid
 from collections.abc import AsyncIterator
+from typing import ClassVar
 
 import pytest
 import socketio
@@ -9,7 +11,7 @@ from httpx import AsyncClient
 
 from app.core.config import Settings
 from app.core.mail import EmailSender, OutboxEmailSender
-from app.core.realtime import SOCKETIO_PATH
+from app.core.realtime import SOCKETIO_PATH, Event, RealtimePublisher
 from app.main import create_app
 from tests.helpers import register_verified
 
@@ -22,10 +24,12 @@ def _free_port() -> int:
 
 
 @pytest.fixture
-async def live(settings: Settings) -> AsyncIterator[tuple[str, OutboxEmailSender]]:
+async def live(
+    settings: Settings,
+) -> AsyncIterator[tuple[str, OutboxEmailSender, RealtimePublisher]]:
     """Real HTTP + WebSocket server (Socket.IO cannot run over the in-memory ASGI transport).
 
-    Yields the base URL plus the server's own outbox, so tests can verify accounts.
+    Yields the base URL, the server's own outbox (to verify accounts) and its publisher.
     """
     app = create_app(settings)
     port = _free_port()
@@ -35,15 +39,22 @@ async def live(settings: Settings) -> AsyncIterator[tuple[str, OutboxEmailSender
         await asyncio.sleep(0.02)
     sender = await app.state.dishka_container.get(EmailSender)
     assert isinstance(sender, OutboxEmailSender)
-    yield f"http://127.0.0.1:{port}", sender
+    publisher = await app.state.dishka_container.get(RealtimePublisher)
+    yield f"http://127.0.0.1:{port}", sender, publisher
     server.should_exit = True
     await task
 
 
-async def test_todo_events_reach_all_owner_devices_only(
-    live: tuple[str, OutboxEmailSender],
+class Ping(Event):
+    event_name: ClassVar[str] = "test.ping"
+
+    message_text: str
+
+
+async def test_events_reach_all_devices_of_the_user_only(
+    live: tuple[str, OutboxEmailSender, RealtimePublisher],
 ) -> None:
-    live_url, outbox = live
+    live_url, outbox, publisher = live
     async with AsyncClient(base_url=live_url) as http:
         owner = (await register_verified(http, outbox, "owner@example.com", prefix="/api/v1"))[
             "accessToken"
@@ -51,6 +62,8 @@ async def test_todo_events_reach_all_owner_devices_only(
         stranger = (
             await register_verified(http, outbox, "stranger@example.com", prefix="/api/v1")
         )["accessToken"]
+        me = await http.get("/api/v1/users/me", headers={"Authorization": f"Bearer {owner}"})
+        owner_id = uuid.UUID(me.json()["id"])
 
         async with (
             socketio.AsyncSimpleClient() as phone,
@@ -65,25 +78,21 @@ async def test_todo_events_reach_all_owner_devices_only(
                     transports=["websocket"],
                 )
 
-            response = await http.post(
-                "/api/v1/todos",
-                json={"title": "Realtime"},
-                headers={"Authorization": f"Bearer {owner}"},
-            )
-            assert response.status_code == 201
+            await publisher.to_user(owner_id, Ping(message_text="hello"))
 
             for device in (phone, laptop):
                 name, payload = await device.receive(timeout=5)
-                assert name == "todo.changed"
-                assert payload["action"] == "created"
-                assert payload["todo"]["title"] == "Realtime"  # camelCase payload, like HTTP
+                assert name == "test.ping"
+                assert payload == {"messageText": "hello"}  # camelCase payload, like HTTP
 
             with pytest.raises(socketio.exceptions.TimeoutError):
                 await other.receive(timeout=0.5)
 
 
-async def test_connection_requires_valid_token(live: tuple[str, OutboxEmailSender]) -> None:
-    live_url, _ = live
+async def test_connection_requires_valid_token(
+    live: tuple[str, OutboxEmailSender, RealtimePublisher],
+) -> None:
+    live_url, _, _ = live
     client = socketio.AsyncSimpleClient()
     with pytest.raises(socketio.exceptions.ConnectionError):
         await client.connect(
